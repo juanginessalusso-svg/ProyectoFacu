@@ -1,0 +1,14 @@
+services:
+  insignia-backend:
+    build: .
+    container_name: insignia-backend
+    restart: unless-stopped
+    ports:
+      # Solo accesible localmente por Nginx en el host
+      - "127.0.0.1:4800:4800"
+    env_file:
+      - .env
+    volumes:
+      # Persistencia en disco de la base de datos SQLite y las fotos subidas
+      - ./data:/app/data
+      - ./uploads:/app/uploads

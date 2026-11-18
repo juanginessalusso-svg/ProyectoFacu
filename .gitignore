@@ -1,0 +1,29 @@
+# Dependencias y compilación
+node_modules/
+dist/
+dist-ssr/
+
+# Variables de entorno y secretos privados
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Bases de datos y archivos privados de historial
+*.db
+*.sqlite
+*.sqlite3
+history_copy.db
+
+# Backups, comprimidos y PDFs pesados
+*.tar.gz
+*.zip
+*.pdf
+
+# Archivos temporales del sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+npm-debug.log*

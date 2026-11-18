@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modelo 3 · Editorial verde · Subastas Insignia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e9efd8;--card:#f8fbef;--ink:#1d2a10;--mute:#64705a;--line:#cfdab5;--dark:#1f2d12;--leaf:#b9cc85}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Montserrat,sans-serif}
+header{background:#0d0d0d;color:#fff;padding:26px 0}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+header .wrap{display:flex;justify-content:space-between;align-items:center}
+.logo{font:400 30px Cormorant Garamond,serif;letter-spacing:.2em}.logo small{font:500 10px Montserrat;letter-spacing:.3em;margin-right:10px}
+nav a{color:#cfcabc;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-left:28px}nav a.on{color:#fff;border-bottom:1px solid #fff;padding-bottom:4px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;padding:64px 0 30px}
+.eyebrow{font:500 11px JetBrains Mono,monospace;letter-spacing:.25em;text-transform:uppercase;color:var(--mute)}.eyebrow:before{content:"— "}
+h1{font:400 66px Cormorant Garamond,serif;margin-top:8px}h1 em{font-style:italic}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+input,select{background:var(--card);border:1px solid var(--line);padding:12px 14px;font:500 12px Montserrat;color:var(--ink);min-width:200px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;padding:20px 0 100px}
+.card{display:grid;grid-template-columns:44% 1fr;background:var(--card);border:1px solid var(--line);transition:.25s}
+.card:hover{box-shadow:0 18px 36px -22px rgba(31,45,18,.6);border-color:var(--leaf)}
+.frame{position:relative;background:#f1f3e6;min-height:360px;display:flex;align-items:center;justify-content:center}
+.obra{aspect-ratio:var(--r);box-shadow:0 12px 24px -10px rgba(0,0,0,.4)}
+.obra.land{width:80%}.obra.port{width:calc(var(--r)*60%);max-height:82%}
+.no{position:absolute;left:14px;bottom:10px;font:italic 400 64px/1 Cormorant Garamond,serif;color:rgba(31,45,18,.18)}
+.info{padding:26px 26px 24px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;font:400 11px JetBrains Mono,monospace;color:var(--mute);letter-spacing:.1em;text-transform:uppercase}
+h3{font:500 32px/1.1 Cormorant Garamond,serif;margin:14px 0 14px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px;line-height:1.5}
+dt{color:var(--mute)}dd{color:var(--ink);font-weight:500}
+.sp{flex:1}
+.price{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}
+.lbl{display:block;font:400 10px JetBrains Mono,monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--mute)}
+.price strong{font:500 34px Cormorant Garamond,serif;display:block;margin:2px 0 4px}
+.last{font-size:12px;color:var(--mute)}.last i{font:italic 18px Cormorant Garamond,serif}
+button{margin-top:16px;background:var(--dark);color:#fff;border:0;padding:14px 18px;font:600 11px Montserrat;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:.2s}
+button:hover{background:#34481f}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}h1{font-size:48px}nav{display:none}}
+@media(max-width:560px){.card{grid-template-columns:1fr}.frame{min-height:300px}}
+</style></head><body>
+<header><div class="wrap"><div class="logo"><small>SUBASTAS</small>INSIGNIA</div><nav><a>Inicio</a><a class="on">Subastas</a><a>Eventos</a><a>Galería</a><a>Nosotros</a></nav></div></header>
+<main class="wrap">
+<section class="hero"><div><p class="eyebrow">Catálogo oficial</p><h1>Lotes <em>disponibles</em></h1></div>
+<div class="tools"><input id="q" placeholder="Buscar obra o artista…"><select id="ar"></select></div></section>
+<div class="grid" id="grid"></div>
+</main>
+<script>
+const LOTS=[
+[1,"Lara Ponsone","Incontinencia","Tinta y grafito sobre papel Arches 300g","33 × 40 cm",500,2024],
+[2,"Lara Ponsone","Intimidad","Tinta y grafito sobre papel Arches 300g","33 × 40 cm",500,2024],
+[3,"Lara Ponsone","Bosque de Piel","Acrílico sobre lienzo","180 × 140 cm",2500,2024],
+[4,"Lara Ponsone","Árbol Rojo","Acrílico sobre lienzo","160 × 130 cm",2700,2024],
+[5,"Lara Ponsone","Peces Enojados","Acrílico sobre lienzo","120 × 140 cm",1000,2007],
+[6,"Gabriel Sáenz","Wall-E","Acrílico sobre tela","50 × 150 cm",800,2013],
+[7,"Cristina Santander","La Casa de Paco","Estampa y grabado original (Serie 7/25)","92 × 66 cm",1000,1997],
+[8,"Cristina Santander","Sin Retorno","Acuarela","28 × 50 cm",800,1995],
+[9,"Cristina Santander","Amistad","Serigrafía (Serie 18/25)","",1200,1994],
+[10,"Cristina Santander","S/T","Técnica mixta (acrílico y collage)","60 × 25 cm",500,1987],
+[11,"Ricardo Bonati","Compañeros","Óleo sobre tela","40 × 56 cm",450,1996],
+[12,"Alicia Díaz Rinaldi","Reflejos","Aguafuerte, collage y stencil","40 × 70 cm",850,2005],
+[13,"María Suardi","S/T","Serigrafía (Edición 72/230)","20 × 20 cm",300,""],
+[14,"Carlos Keipert","Homenaje al Maestro","Óleo sobre tela","50 × 60 cm",650,""],
+[15,"Carlos Keipert","Luz en Silencio","Óleo sobre tela","63 × 76 cm",800,""],
+[16,"Héctor Otegui","La Casa de Doña Pancha (Holmberg)","Óleo","50 × 60 cm",400,2002],
+[17,"Héctor Otegui","El Campo de Alicia (La Gilda)","Óleo","50 × 60 cm",400,2002],
+[18,"Héctor Otegui","Paisaje Serrano","Óleo","50 × 60 cm",400,2000],
+[19,"Héctor Otegui","El Patio","Óleo","50 × 60 cm",400,2012],
+[20,"Héctor Otegui","La Acequia","Óleo","50 × 60 cm",400,2011],
+[21,"Héctor Otegui","La Casa de Doña Pancha","Óleo","50 × 60 cm",400,2002],
+[22,"Ricardo Fernández","Santa Juana de Arco","Scrap metal (chatarra soldada)","20 × 20 cm",520,2013],
+[23,"Ricardo Fernández","Caballo en Carrera","Scrap metal (chatarra soldada)","30 × 19 cm",500,2013],
+[24,"Ricardo Fernández","Caballo Libre","Scrap metal (chatarra soldada)","17 × 12 cm",380,2013]
+].map(([n,artist,title,tech,size,price,year])=>{const m=size.match(/\d+/g);return{n,artist,title,tech,size,price,year,img:"",r:m&&m.length>1?m[0]/m[1]:1}});
+const money=v=>"USD "+v.toLocaleString("es-AR");
+const pad=n=>String(n).padStart(2,"0");
+const art=(l,a=48,b=-40)=>{const h=(l.n*47)%360;const bg=l.img?`url(${l.img}) center/cover`:`linear-gradient(135deg,hsl(${h} 38% 68%),hsl(${(h+a+360)%360} 40% 42%))`;const cls=l.r>=1?"land":"port";return `<div class="obra ${cls}" style="--r:${l.r};background:${bg}"></div>`};
+
+ar.innerHTML='<option value="">Todos los artistas</option>'+[...new Set(LOTS.map(l=>l.artist))].map(a=>`<option>${a}</option>`).join("");
+function render(){
+ const t=q.value.toLowerCase();
+ grid.innerHTML=LOTS.filter(l=>(!ar.value||l.artist==ar.value)&&(l.title+l.artist).toLowerCase().includes(t)).map(l=>`<article class="card"><div class="frame">${art(l)}<span class="no">${pad(l.n)}</span></div><div class="info"><div class="top"><span>${l.artist}</span><span>${l.year||""}</span></div><h3>${l.title}</h3><dl><dt>Técnica</dt><dd>${l.tech}</dd>${l.size?`<dt>Medidas</dt><dd>${l.size}</dd>`:""}<dt>Lote</dt><dd>#${pad(l.n)}</dd></dl><div class="sp"></div><div class="price"><span class="lbl">Precio base</span><strong>${money(l.price)}</strong><span class="last">Último pujante: <i>sin pujas aún</i></span></div><button>Hacer preoferta</button></div></article>`).join("");
+}
+q.oninput=ar.onchange=render;render();
+</script></body></html>

@@ -1,0 +1,7 @@
+# robots.txt para Subastas Insignia
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://subastasinsignia.com.ar/sitemap.xml
