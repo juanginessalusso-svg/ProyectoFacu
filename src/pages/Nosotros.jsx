@@ -77,7 +77,7 @@ export default function Nosotros() {
                   <h2 className="font-serif text-3xl md:text-4xl text-[var(--ivory)] font-light mb-5 tracking-wide">
                     Nuestra <em>Misión</em>
                   </h2>
-                  <p className="text-[var(--ivory-dim)] text-base leading-relaxed">
+                  <p className="text-[var(--ivory-dim)] text-lg md:text-[1.15rem] leading-relaxed">
                     <strong className="text-[var(--ivory)] font-medium">Insignia</strong> surge con el
                     fin de generar un mercado definido, el del arte y las antigüedades, brindándole al
                     cliente vendedor un medio seguro y confiable para ofrecer sus productos. Para el
@@ -85,7 +85,7 @@ export default function Nosotros() {
                     con autenticidad y una forma de inversión que contribuye al fomento cultural.
                   </p>
                 </div>
-                <div className="mt-8 pt-6 border-t border-[var(--line-soft)] flex items-center gap-3 text-xs text-[var(--gold-hi)] font-mono uppercase tracking-wider">
+                <div className="mt-8 pt-6 border-t border-[var(--line-soft)] flex items-center gap-3 font-serif text-base md:text-lg text-[var(--gold)] tracking-wide">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
                   Seguridad · Confianza · Autenticidad
                 </div>
@@ -126,7 +126,7 @@ export default function Nosotros() {
                   <h2 className="font-serif text-3xl md:text-4xl text-[var(--ivory)] font-light mb-5 tracking-wide">
                     Nuestra <em>Visión</em>
                   </h2>
-                  <p className="text-[var(--ivory-dim)] text-base leading-relaxed">
+                  <p className="text-[var(--ivory-dim)] text-lg md:text-[1.15rem] leading-relaxed">
                     <strong className="text-[var(--ivory)] font-medium">Insignia</strong> tiene como
                     objetivo lograr ser una empresa bien posicionada a nivel nacional e internacional
                     en el ámbito de las subastas de arte y antigüedades, posicionando a la marca como
@@ -134,7 +134,7 @@ export default function Nosotros() {
                     en la sociedad.
                   </p>
                 </div>
-                <div className="mt-8 pt-6 border-t border-[var(--line-soft)] flex items-center gap-3 text-xs text-[var(--gold-hi)] font-mono uppercase tracking-wider">
+                <div className="mt-8 pt-6 border-t border-[var(--line-soft)] flex items-center gap-3 font-serif text-base md:text-lg text-[var(--gold)] tracking-wide">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
                   Referencia nacional · Difusión cultural
                 </div>

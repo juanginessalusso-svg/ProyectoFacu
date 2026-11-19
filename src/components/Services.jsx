@@ -1,39 +1,50 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Hash } from 'lucide-react';
 import { SERVICES } from '../data/content';
 
 export default function Services() {
   return (
-    <section className="section" style={{ paddingTop: '70px', paddingBottom: '100px' }}>
+    <section className="m2-servicios">
       <div className="wrap">
-        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[var(--ivory)] font-normal mb-8 sm:mb-10 tracking-tight">
-          Nuestros servicios
-        </h2>
-        <div className="services">
-          {SERVICES.map(({ icon: Icon, title, text }) => {
-            const RenderIcon = title === 'Curaduría' ? Hash : Icon;
-            return (
-              <Link
-                to="/nosotros"
-                key={title}
-                className="service group"
-                title={`Más información sobre ${title}`}
-              >
-                <div>
-                  <div className="service-icon">
-                    <RenderIcon size={26} strokeWidth={1.4} />
+        <div className="m2-servicios__inner">
+          <div>
+            <div className="m2-eyebrow">ÁREAS DE ESPECIALIDAD</div>
+            <div className="m2-head">
+              <h2>
+                Nuestros <em>servicios</em>
+              </h2>
+              <p>
+                Acompañamiento profesional, transparencia y rigor en cada etapa del mercado del arte.
+              </p>
+            </div>
+          </div>
+
+          <div className="m2-grid">
+            {SERVICES.map(({ title, text, image, alt }, index) => {
+              const numStr = String(index + 1).padStart(2, '0');
+              return (
+                <Link
+                  to="/nosotros"
+                  key={title}
+                  className="m2-panel group"
+                  title={`Más información sobre ${title}`}
+                >
+                  {image && (
+                    <img
+                      src={image}
+                      alt={alt || title}
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="m2-panel__num">{numStr}</div>
+                  <div className="m2-panel__body">
+                    <h3>{title}</h3>
+                    <p>{text}</p>
                   </div>
-                  <h4>{title}</h4>
-                  <p>{text}</p>
-                </div>
-                <div className="service-link">
-                  <span>Saber más</span>
-                  <span className="arrow">→</span>
-                </div>
-              </Link>
-            );
-          })}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

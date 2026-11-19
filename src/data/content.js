@@ -162,21 +162,29 @@ export const SERVICES = [
     icon: Frame,
     title: 'Curaduría',
     text: 'Selección y montaje de piezas con criterio profesional para que cada obra luzca su máximo potencial.',
+    image: '/img/servicios/curaduria.jpg',
+    alt: 'Obras expuestas en sala de curaduría',
   },
   {
     icon: Scale,
     title: 'Tasación',
     text: 'Valoración profesional de obras y antigüedades con respaldo documental y peritaje calificado.',
+    image: '/img/servicios/tasacion.jpg',
+    alt: 'Visitantes observando cuadros en la galería',
   },
   {
     icon: Gavel,
     title: 'Subastas',
     text: 'Subastas presenciales en sala con convocatoria a coleccionistas e inversores del país.',
+    image: '/img/servicios/subastas.jpg',
+    alt: 'Sala llena durante una subasta presencial',
   },
   {
     icon: Handshake,
     title: 'Consignaciones',
     text: 'Recepción de obras en consignación y vinculación directa con el mercado de arte.',
+    image: '/img/servicios/consignaciones.jpg',
+    alt: 'Dos personas conversando frente a una obra',
   },
 ];
 

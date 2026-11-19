@@ -22,7 +22,7 @@ function ScrollToTop() {
 
 export default function App() {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
+  const isAdmin = location.pathname.startsWith('/panel-insignia');
 
   return (
     <>
@@ -34,7 +34,7 @@ export default function App() {
         <Route path="/eventos" element={<Eventos />} />
         <Route path="/galeria" element={<Galeria />} />
         <Route path="/nosotros" element={<Nosotros />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/panel-insignia" element={<Admin />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {!isAdmin && <Footer />}
