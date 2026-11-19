@@ -2,7 +2,7 @@ import { LOTS as DEFAULT_LOTS } from '../data/subastas';
 import { IMAGES } from '../data/content';
 
 export const STORAGE_KEYS = {
-  LOTS: 'insignia_admin_lots_v3',
+  LOTS: 'insignia_admin_lots_v4',
   EVENTS: 'insignia_admin_events_v4',
   GALLERY: 'insignia_admin_gallery_v3',
   PIN: 'insignia_admin_pin_v3',
@@ -187,7 +187,14 @@ export async function syncFromServer() {
     const data = await res.json();
 
     if (data.lots && Array.isArray(data.lots) && data.lots.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.LOTS, JSON.stringify(data.lots));
+      const normalizedLots = data.lots.map(lot => {
+        let img = lot.image || '';
+        if (img.startsWith('/img/subastas/') && !img.includes('?v=')) {
+          img = `${img}?v=2`;
+        }
+        return { ...lot, image: img };
+      });
+      localStorage.setItem(STORAGE_KEYS.LOTS, JSON.stringify(normalizedLots));
     }
     if (data.events && Array.isArray(data.events) && data.events.length > 0) {
       localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(data.events));
@@ -281,21 +288,23 @@ export function saveDeadline(dateString) {
 export function getLots() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.LOTS);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.LOTS, JSON.stringify(DEFAULT_LOTS));
-      return DEFAULT_LOTS;
-    }
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      let hasLegacy = false;
-      const normalized = parsed.map(lot => {
-        if (lot.basePrice && lot.basePrice.includes('U$S')) {
-          hasLegacy = true;
-          return { ...lot, basePrice: lot.basePrice.replace(/U\$S/g, '$USD') };
+    const source = raw ? JSON.parse(raw) : DEFAULT_LOTS;
+    if (Array.isArray(source) && source.length > 0) {
+      let needsSave = !raw;
+      const normalized = source.map(lot => {
+        let img = lot.image || '';
+        if (img.startsWith('/img/subastas/') && !img.includes('?v=')) {
+          img = `${img}?v=2`;
+          needsSave = true;
         }
-        return lot;
+        let basePrice = lot.basePrice;
+        if (basePrice && basePrice.includes('U$S')) {
+          basePrice = basePrice.replace(/U\$S/g, '$USD');
+          needsSave = true;
+        }
+        return { ...lot, image: img, basePrice };
       });
-      if (hasLegacy) {
+      if (needsSave) {
         localStorage.setItem(STORAGE_KEYS.LOTS, JSON.stringify(normalized));
       }
       return normalized;

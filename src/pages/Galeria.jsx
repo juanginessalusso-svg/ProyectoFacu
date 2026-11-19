@@ -4,7 +4,6 @@ import Gallery from '../components/Gallery';
 export default function Galeria() {
   useEffect(() => {
     document.title = 'La Galería · Espacio de Arte Alberdi 355 | Subastas Insignia';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (

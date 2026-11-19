@@ -16,7 +16,7 @@ export const LOTS = [
     year: '2024',
     basePrice: '$USD 500',
     priceValue: 500,
-    image: '/img/subastas/lote-01.jpg',
+    image: '/img/subastas/lote-01.jpg?v=2',
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ export const LOTS = [
     year: '2024',
     basePrice: '$USD 500',
     priceValue: 500,
-    image: '/img/subastas/lote-02.jpg',
+    image: '/img/subastas/lote-02.jpg?v=2',
   },
   {
     id: 3,
@@ -40,7 +40,7 @@ export const LOTS = [
     year: '2024',
     basePrice: '$USD 2.500',
     priceValue: 2500,
-    image: '/img/subastas/lote-03.jpg',
+    image: '/img/subastas/lote-03.jpg?v=2',
   },
   {
     id: 4,
@@ -52,7 +52,7 @@ export const LOTS = [
     year: '2024',
     basePrice: '$USD 2.700',
     priceValue: 2700,
-    image: '/img/subastas/lote-04.jpg',
+    image: '/img/subastas/lote-04.jpg?v=2',
   },
   {
     id: 5,
@@ -64,7 +64,7 @@ export const LOTS = [
     year: '2007',
     basePrice: '$USD 1.000',
     priceValue: 1000,
-    image: '/img/subastas/lote-05.jpg',
+    image: '/img/subastas/lote-05.jpg?v=2',
   },
   {
     id: 6,
@@ -77,7 +77,7 @@ export const LOTS = [
     year: '2013',
     basePrice: '$USD 800',
     priceValue: 800,
-    image: '/img/subastas/lote-06.jpg',
+    image: '/img/subastas/lote-06.jpg?v=2',
   },
   {
     id: 7,
@@ -89,7 +89,7 @@ export const LOTS = [
     year: '1997',
     basePrice: '$USD 1.000',
     priceValue: 1000,
-    image: '/img/subastas/lote-07.jpg',
+    image: '/img/subastas/lote-07.jpg?v=2',
   },
   {
     id: 8,
@@ -101,7 +101,7 @@ export const LOTS = [
     year: '1995',
     basePrice: '$USD 800',
     priceValue: 800,
-    image: '/img/subastas/lote-08.jpg',
+    image: '/img/subastas/lote-08.jpg?v=2',
   },
   {
     id: 9,
@@ -114,7 +114,7 @@ export const LOTS = [
     year: '1994',
     basePrice: '$USD 1.200',
     priceValue: 1200,
-    image: '/img/subastas/lote-09.jpg',
+    image: '/img/subastas/lote-09.jpg?v=2',
   },
   {
     id: 10,
@@ -126,7 +126,7 @@ export const LOTS = [
     year: '1987',
     basePrice: '$USD 500',
     priceValue: 500,
-    image: '/img/subastas/lote-10.jpg',
+    image: '/img/subastas/lote-10.jpg?v=2',
   },
   {
     id: 11,
@@ -138,7 +138,7 @@ export const LOTS = [
     year: '1996',
     basePrice: '$USD 450',
     priceValue: 450,
-    image: '/img/subastas/lote-11.jpg',
+    image: '/img/subastas/lote-11.jpg?v=2',
   },
   {
     id: 12,
@@ -150,7 +150,7 @@ export const LOTS = [
     year: '2005',
     basePrice: '$USD 850',
     priceValue: 850,
-    image: '/img/subastas/lote-12.jpg',
+    image: '/img/subastas/lote-12.jpg?v=2',
   },
   {
     id: 13,
@@ -162,7 +162,7 @@ export const LOTS = [
     year: null,
     basePrice: '$USD 300',
     priceValue: 300,
-    image: '/img/subastas/lote-13.jpg',
+    image: '/img/subastas/lote-13.jpg?v=2',
   },
   {
     id: 14,
@@ -174,7 +174,7 @@ export const LOTS = [
     year: null,
     basePrice: '$USD 650',
     priceValue: 650,
-    image: '/img/subastas/lote-14.jpg',
+    image: '/img/subastas/lote-14.jpg?v=2',
   },
   {
     id: 15,
@@ -186,7 +186,7 @@ export const LOTS = [
     year: null,
     basePrice: '$USD 800',
     priceValue: 800,
-    image: '/img/subastas/lote-15.jpg',
+    image: '/img/subastas/lote-15.jpg?v=2',
   },
   {
     id: 16,
@@ -198,7 +198,7 @@ export const LOTS = [
     year: '2002',
     basePrice: '$USD 400',
     priceValue: 400,
-    image: '/img/subastas/lote-16.jpg',
+    image: '/img/subastas/lote-16.jpg?v=2',
   },
   {
     id: 17,
@@ -210,7 +210,7 @@ export const LOTS = [
     year: '2002',
     basePrice: '$USD 400',
     priceValue: 400,
-    image: '/img/subastas/lote-17.jpg',
+    image: '/img/subastas/lote-17.jpg?v=2',
   },
   {
     id: 18,
@@ -222,7 +222,7 @@ export const LOTS = [
     year: '2000',
     basePrice: '$USD 400',
     priceValue: 400,
-    image: '/img/subastas/lote-18.jpg',
+    image: '/img/subastas/lote-18.jpg?v=2',
   },
   {
     id: 19,
@@ -234,7 +234,7 @@ export const LOTS = [
     year: '2012',
     basePrice: '$USD 400',
     priceValue: 400,
-    image: '/img/subastas/lote-19.jpg',
+    image: '/img/subastas/lote-19.jpg?v=2',
   },
   {
     id: 20,
@@ -246,7 +246,7 @@ export const LOTS = [
     year: '2011',
     basePrice: '$USD 400',
     priceValue: 400,
-    image: '/img/subastas/lote-20.jpg',
+    image: '/img/subastas/lote-20.jpg?v=2',
   },
   {
     id: 21,
@@ -258,7 +258,7 @@ export const LOTS = [
     year: '2002',
     basePrice: '$USD 400',
     priceValue: 400,
-    image: '/img/subastas/lote-21.jpg',
+    image: '/img/subastas/lote-21.jpg?v=2',
   },
   {
     id: 22,
@@ -270,7 +270,7 @@ export const LOTS = [
     year: '2013',
     basePrice: '$USD 520',
     priceValue: 520,
-    image: '/img/subastas/lote-22.jpg',
+    image: '/img/subastas/lote-22.jpg?v=2',
   },
   {
     id: 23,
@@ -282,7 +282,7 @@ export const LOTS = [
     year: '2013',
     basePrice: '$USD 500',
     priceValue: 500,
-    image: '/img/subastas/lote-23.jpg',
+    image: '/img/subastas/lote-23.jpg?v=2',
   },
   {
     id: 24,
@@ -294,6 +294,6 @@ export const LOTS = [
     year: '2013',
     basePrice: '$USD 380',
     priceValue: 380,
-    image: '/img/subastas/lote-24.jpg',
+    image: '/img/subastas/lote-24.jpg?v=2',
   },
 ];

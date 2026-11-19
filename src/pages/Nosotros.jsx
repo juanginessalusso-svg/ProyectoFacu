@@ -53,7 +53,6 @@ function AnimatedBlock({ children, direction = 'left', delay = '0s', className =
 export default function Nosotros() {
   useEffect(() => {
     document.title = 'Sobre Nosotros · Misión, Visión & Patrimonio | Subastas Insignia';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (

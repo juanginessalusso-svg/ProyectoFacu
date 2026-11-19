@@ -70,7 +70,6 @@ export default function Subastas() {
 
   useEffect(() => {
     document.title = 'Subastas & Catálogo Inaugural · Subastas Insignia';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const handleDataChange = () => {
       setLots(getLots());

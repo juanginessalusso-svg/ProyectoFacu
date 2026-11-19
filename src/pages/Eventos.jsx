@@ -59,7 +59,6 @@ export default function Eventos() {
 
   useEffect(() => {
     document.title = 'Eventos & Exposiciones · Memoria Fotográfica & Próximas Fechas | Subastas Insignia';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const handleDataChange = () => {
       setEvents(getEvents());
@@ -113,132 +112,145 @@ export default function Eventos() {
           {/* ========================================================= */}
           {/* SECCIÓN 1: MEMORIA DE EVENTOS REALIZADOS (CON FOTOGRAFÍAS) */}
           {/* ========================================================= */}
-          <div className="sec-head">
-            <div>
-              <p className="eyebrow">Memoria & Encuentros</p>
-              <h1 className="h2" style={{ fontSize: 'clamp(2.8rem, 6.2vw, 4.6rem)' }}>
-                Even<em>tos</em>
-              </h1>
+          <div className="mb-12">
+            <div className="flex items-center gap-4 text-[13px] tracking-[0.34em] uppercase text-[#e0dccf] font-medium before:content-[''] before:w-10 before:h-[1px] before:bg-[#e0dccf]">
+              Memoria &amp; Encuentros
             </div>
+            <h1 className="mt-6 font-display font-medium text-[clamp(60px,9vw,120px)] leading-[0.95] tracking-tight text-[#f4f1ea]">
+              Even<em className="font-normal italic">tos</em>
+            </h1>
           </div>
 
           {/* Listado Editorial de Eventos Realizados */}
-          <div className="space-y-16 mt-8">
+          <div className="grid gap-12 mt-12">
             {filteredPastEvents.map((ev, eventIdx) => {
               const evImages = Array.isArray(ev.images) && ev.images.length > 0
                 ? ev.images
                 : (ev.image ? [ev.image] : []);
               const coverImage = ev.image || evImages[0] || '/img/sala-exhibicion.jpg';
-              const galleryThumbnails = evImages.slice(1, 7);
+              const hasMoreThanSix = evImages.length > 7;
+              const thumbsToShow = hasMoreThanSix ? evImages.slice(1, 6) : evImages.slice(1, 7);
 
               return (
                 <AnimatedCard
                   key={ev.id || eventIdx}
                   delay={(eventIdx % 3) * 140}
-                  className="border border-[var(--line-soft)] bg-gradient-to-b from-[var(--ink-3)] to-[var(--ink-2)] p-6 md:p-10 shadow-sm transition-all duration-300 hover:border-[var(--gold)]/60 hover:shadow-2xl"
+                  className="bg-[#46453d] border border-white/15 overflow-hidden transition-all duration-300 hover:border-white/30 shadow-xl"
                 >
-                  {/* Encabezado del Evento */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[var(--line-soft)]">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="px-3 py-1 text-[11px] font-semibold tracking-wider uppercase bg-[var(--ink-2)] text-[var(--ivory-dim)] border border-[var(--line-soft)]">
-                        {ev.status || 'Realizado'}
-                      </span>
-                    </div>
+                  {/* Meta Superior */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 md:px-12 md:py-6 border-b border-white/15">
+                    <span className="inline-block bg-[#6b6a5f] text-white border border-white/20 text-[13px] font-semibold tracking-[0.14em] uppercase px-4 py-2.5">
+                      {ev.status || 'Realizado'}
+                    </span>
 
-                    <div className="flex items-center gap-4 text-xs text-[var(--ivory-dim)] font-medium">
-                      <span className="flex items-center gap-1.5 text-[var(--gold-hi)] font-semibold">
-                        <Calendar size={15} className="text-[var(--gold)]" />
-                        {ev.date}
-                      </span>
-                      {ev.time && (
-                        <span className="flex items-center gap-1.5 font-mono text-[var(--ivory-dim)]">
-                          <Clock size={14} className="text-[var(--gold)]" />
-                          {ev.time}
-                        </span>
-                      )}
+                    <div className="flex flex-wrap items-center gap-3 md:gap-7 text-base">
+                      <div className="flex items-center gap-2.5 text-lg font-semibold text-[#f4f1ea]">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+                          <rect x="3" y="5" width="18" height="16" rx="1"></rect>
+                          <path d="M3 10h18M8 3v4M16 3v4"></path>
+                        </svg>
+                        <span>{ev.date}</span>
+                      </div>
+
                       {ev.location && (
-                        <span className="flex items-center gap-1.5 hidden sm:inline-flex">
-                          <MapPin size={15} className="text-[var(--gold)]" />
-                          {ev.location}
-                        </span>
+                        <div className="flex items-center gap-2.5 text-base text-[#ece8dc]">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+                            <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"></path>
+                            <circle cx="12" cy="9.5" r="2.5"></circle>
+                          </svg>
+                          <span>{ev.location}</span>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Cuerpo: Descripción y Galería Fotográfica */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 mt-8 items-start">
-                    {/* Columna Izquierda: Información Narrativa */}
-                    <div className="lg:col-span-5 space-y-5">
-                      <h2 className="font-serif text-3xl md:text-4xl text-[var(--ivory)] font-normal leading-tight">
-                        {ev.title}
-                      </h2>
-
-                      <p className="text-sm md:text-base text-[var(--ivory-dim)] leading-relaxed whitespace-pre-line font-normal">
+                  {/* Texto: Título a la izquierda, Descripción a la derecha */}
+                  <div className="flex flex-wrap gap-6 md:gap-16 px-6 py-8 md:px-12 md:py-12">
+                    <h2 className="flex-1 min-w-[280px] md:min-w-[380px] m-0 font-display font-medium text-[clamp(32px,4.5vw,58px)] leading-[1.04] tracking-tight text-[#f4f1ea]">
+                      {ev.title}
+                    </h2>
+                    {ev.description && (
+                      <p className="flex-1 min-w-[280px] md:min-w-[420px] m-0 pt-2 text-base md:text-[18px] leading-[1.75] text-[#ece8dc] whitespace-pre-line font-normal">
                         {ev.description}
                       </p>
-                    </div>
+                    )}
+                  </div>
 
-                    {/* Columna Derecha: Galería Fotográfica del Evento */}
-                    <div className="lg:col-span-7 space-y-3">
-                      {/* Fotografía Principal */}
-                      <div
-                        className="relative aspect-[16/10] overflow-hidden rounded bg-black/10 cursor-pointer group border border-[var(--line-soft)] hover:border-[var(--gold)] transition-all shadow-md"
-                        onClick={() => handleOpenLightbox(ev, 0)}
-                        title="Clic para ampliar en alta resolución"
-                      >
-                        <img
-                          src={coverImage}
-                          alt={ev.title}
-                          loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                          onError={(e) => {
-                            e.target.src = '/img/sala-exhibicion.jpg';
+                  {/* Galería Fotográfica: Foto grande a todo el ancho + Miniaturas */}
+                  <div className="px-6 pb-6 md:px-12 md:pb-12">
+                    {/* Foto Principal */}
+                    <div
+                      className="group relative flex items-center justify-center overflow-hidden aspect-[4/3] md:aspect-[21/9] min-h-[240px] cursor-pointer bg-gradient-to-br from-[#3a3932] to-[#62615a]"
+                      onClick={() => handleOpenLightbox(ev, 0)}
+                      title="Clic para ampliar en alta resolución"
+                    >
+                      <img
+                        src={coverImage}
+                        alt={ev.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        onError={(e) => {
+                          e.target.src = '/img/sala-exhibicion.jpg';
+                        }}
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                      <div className="absolute left-4 right-4 bottom-4 md:left-5 md:right-5 md:bottom-5 z-10 flex items-center justify-between gap-3">
+                        <span className="bg-[#121210]/80 backdrop-blur-md text-white text-xs md:text-sm font-semibold tracking-wider px-3.5 py-2">
+                          Foto 1 de {evImages.length}
+                        </span>
+                        <button
+                          type="button"
+                          className="bg-[#121210]/80 hover:bg-black backdrop-blur-md text-white text-xs md:text-sm font-medium px-3.5 py-2 inline-flex items-center gap-2 transition-colors cursor-pointer border-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenLightbox(ev, 0);
                           }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
-
-                        <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-between text-xs text-white/90">
-                          <span className="font-mono text-[11px] bg-black/60 backdrop-blur-md px-2.5 py-1 rounded">
-                            Foto 1 de {evImages.length}
-                          </span>
-                          <span className="flex items-center gap-1.5 text-[11px] font-medium bg-[var(--gold)]/90 backdrop-blur-md px-2.5 py-1 rounded text-white group-hover:bg-[var(--gold)] transition-colors">
-                            <Images size={13} />
-                            Ampliar galería
-                          </span>
-                        </div>
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <rect x="8" y="3" width="13" height="13" rx="1"></rect>
+                            <path d="M16 20H4a1 1 0 0 1-1-1V8"></path>
+                          </svg>
+                          <span>Ampliar galería</span>
+                        </button>
                       </div>
-
-                      {/* Mosaico de Miniaturas del Evento */}
-                      {galleryThumbnails.length > 0 && (
-                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                          {galleryThumbnails.map((thumbUrl, thumbIdx) => {
-                            const globalIdx = thumbIdx + 1;
-                            const isLastAndMore = thumbIdx === 5 && evImages.length > 7;
-
-                            return (
-                              <div
-                                key={thumbIdx}
-                                className="relative aspect-square rounded overflow-hidden cursor-pointer group border border-[var(--line-soft)] hover:border-[var(--gold)] transition-all bg-black/10"
-                                onClick={() => handleOpenLightbox(ev, globalIdx)}
-                                title={`Ver fotografía ${globalIdx + 1}`}
-                              >
-                                <img
-                                  src={thumbUrl}
-                                  alt=""
-                                  loading="lazy"
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                                />
-                                {isLastAndMore && (
-                                  <div className="absolute inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center text-white font-mono text-xs font-bold">
-                                    +{evImages.length - 6}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
+
+                    {/* Mosaico de Miniaturas debajo */}
+                    {evImages.length > 1 && (
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-3">
+                        {thumbsToShow.map((thumbUrl, tIdx) => {
+                          const globalIdx = tIdx + 1;
+                          return (
+                            <button
+                              type="button"
+                              key={tIdx}
+                              className="aspect-square p-0 border-0 cursor-pointer relative overflow-hidden bg-gradient-to-br from-[#3d3c35] to-[#66655a] group focus-visible:outline-2 focus-visible:outline-white"
+                              onClick={() => handleOpenLightbox(ev, globalIdx)}
+                              aria-label={`Ver foto ${globalIdx + 1}`}
+                            >
+                              <img
+                                src={thumbUrl}
+                                alt=""
+                                loading="lazy"
+                                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                              />
+                            </button>
+                          );
+                        })}
+
+                        {hasMoreThanSix && (
+                          <button
+                            type="button"
+                            className="aspect-square p-0 border-0 cursor-pointer bg-[#1c1b17] hover:bg-black text-white font-semibold text-base flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-white"
+                            onClick={() => handleOpenLightbox(ev, 6)}
+                            aria-label={`Ver ${evImages.length - 6} fotos más`}
+                          >
+                            +{evImages.length - 6}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </AnimatedCard>
               );
@@ -249,14 +261,17 @@ export default function Eventos() {
           {/* SECCIÓN 2: PRÓXIMOS EVENTOS (CALENDARIO & HORARIO)       */}
           {/* ========================================================= */}
           <div className="mt-28 pt-20 border-t-2 border-[var(--line)]">
-            <div className="sec-head">
-              <div>
-                <p className="eyebrow">Agenda & Aperturas</p>
-                <h2 className="h2" style={{ fontSize: 'clamp(2.4rem, 5.5vw, 4rem)' }}>
-                  Próximos <em>Eventos</em>
+            {/* Header / Intro */}
+            <div className="flex flex-wrap items-end justify-between gap-8 md:gap-16">
+              <div className="flex-1 min-w-[280px]">
+                <div className="flex items-center gap-4 text-[13px] tracking-[0.34em] uppercase text-[#e0dccf] font-medium before:content-[''] before:w-10 before:h-[1px] before:bg-[#e0dccf]">
+                  Agenda &amp; Aperturas
+                </div>
+                <h2 className="mt-6 font-display font-medium text-[clamp(48px,7vw,96px)] leading-[0.95] tracking-tight text-[#f4f1ea]">
+                  Próximos <em className="font-normal italic">Eventos</em>
                 </h2>
               </div>
-              <p className="sec-note">
+              <p className="flex-initial max-w-[400px] text-[16px] md:text-[17px] leading-[1.7] text-[#e4e0d4] m-0">
                 Fechas confirmadas, veladas culturales y subastas presenciales en sala. Reserva tu asistencia para participar de las próximas jornadas.
               </p>
             </div>
@@ -264,7 +279,7 @@ export default function Eventos() {
             {upcomingEvents.length === 0 ? (
               <div className="p-8 md:p-14 border border-[var(--line-soft)] bg-gradient-to-b from-[var(--ink-3)] to-[var(--ink-2)] text-center my-10 rounded-lg">
                 <Calendar className="w-10 h-10 text-[var(--gold)] mx-auto mb-3 opacity-80" />
-                <h3 className="font-serif text-2xl text-[var(--ivory)] font-light mb-3">
+                <h3 className="font-display text-2xl text-[var(--ivory)] font-light mb-3">
                   Próximas Fechas en Planificación
                 </h3>
                 <p className="text-[var(--ivory-dim)] max-w-xl mx-auto text-sm md:text-base leading-relaxed">
@@ -272,66 +287,97 @@ export default function Eventos() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-                {upcomingEvents.map((uev, uIdx) => (
-                  <AnimatedCard
-                    key={uev.id || uIdx}
-                    delay={(uIdx % 2) * 150}
-                    className="border border-[var(--line-soft)] bg-gradient-to-b from-[var(--ink-3)] to-[var(--ink-2)] p-7 md:p-8 rounded-lg flex flex-col justify-between hover:border-[var(--gold)] transition-all duration-300 shadow-md group relative overflow-hidden hover:shadow-2xl"
-                  >
-                    {/* Badge de Próximo / Estado */}
-                    <div className="flex items-center justify-between gap-3 pb-5 border-b border-[var(--line-soft)]">
-                      <span className="px-3 py-1 text-[11px] font-semibold tracking-wider uppercase bg-emerald-950/70 text-emerald-200 border border-emerald-600/30 rounded-sm">
-                        Próximo Evento
-                      </span>
-                    </div>
+              <div className="space-y-12 mt-14">
+                {upcomingEvents.map((uev, uIdx) => {
+                  const dayMatch = uev.date ? uev.date.match(/\d+/) : null;
+                  const ghostNumber = dayMatch ? dayMatch[0].padStart(2, '0') : String(uIdx + 1).padStart(2, '0');
 
-                    {/* Contenido Principal: Fecha, Hora y Título */}
-                    <div className="py-6 space-y-4">
-                      {/* Bloque Fecha y Hora destacado */}
-                      <div className="flex flex-wrap items-center gap-4 text-xs md:text-sm">
-                        <div className="flex items-center gap-2 text-[var(--gold-hi)] font-semibold bg-[var(--ink-2)]/60 px-3 py-1.5 rounded border border-[var(--line-soft)]">
-                          <Calendar size={16} className="text-[var(--gold)]" />
-                          <span>{uev.date}</span>
-                        </div>
+                  return (
+                    <AnimatedCard
+                      key={uev.id || uIdx}
+                      delay={(uIdx % 2) * 150}
+                      className="bg-[#46453d] border border-white/15 overflow-hidden transition-all duration-300 hover:border-white/30 shadow-xl"
+                    >
+                      {/* Top Bar: Badge y Fecha/Hora */}
+                      <div className="flex flex-wrap items-center justify-between gap-5 px-6 py-6 md:px-12 md:py-7 border-b border-white/15">
+                        <span className="inline-block bg-[#18463a] border border-[#226b57] text-white text-[13px] font-semibold tracking-[0.16em] uppercase px-4 py-2.5">
+                          Próximo evento
+                        </span>
 
-                        {uev.time && (
-                          <div className="flex items-center gap-2 text-[var(--gold-hi)] font-semibold bg-[var(--ink-2)]/60 px-3 py-1.5 rounded border border-[var(--line-soft)] font-mono">
-                            <Clock size={16} className="text-[var(--gold)]" />
-                            <span>{uev.time}</span>
+                        <div className="flex flex-wrap items-center gap-4 sm:gap-7">
+                          <div className="flex items-center gap-3 text-lg md:text-xl font-medium text-[#f4f1ea]">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+                              <rect x="3" y="5" width="18" height="16" rx="1"></rect>
+                              <path d="M3 10h18M8 3v4M16 3v4"></path>
+                            </svg>
+                            <span>{uev.date}</span>
                           </div>
-                        )}
+
+                          {uev.time && (
+                            <>
+                              <span className="hidden sm:block w-[1px] h-6 bg-white/30" aria-hidden="true"></span>
+                              <div className="flex items-center gap-3 text-lg md:text-xl font-medium text-[#f4f1ea]">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+                                  <circle cx="12" cy="12" r="9"></circle>
+                                  <path d="M12 7v5l3 2"></path>
+                                </svg>
+                                <span>{uev.time}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Título del Evento */}
-                      <h3 className="font-serif text-2xl md:text-3xl text-[var(--ivory)] font-medium leading-snug group-hover:text-[var(--gold-hi)] transition-colors">
-                        {uev.title}
-                      </h3>
+                      {/* Título Principal con Número Fantasma en fondo */}
+                      <div className="relative overflow-hidden px-6 py-12 md:px-12 md:py-16">
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none select-none absolute right-6 -top-7 font-display font-medium text-[clamp(160px,22vw,320px)] leading-none text-white/[0.07]"
+                        >
+                          {ghostNumber}
+                        </div>
 
-                      {/* Descripción */}
-                      {uev.description && (
-                        <p className="text-xs md:text-sm text-[var(--ivory-dim)] leading-relaxed pt-1">
-                          {uev.description}
-                        </p>
-                      )}
-                    </div>
+                        <h3 className="relative z-10 m-0 max-w-[860px] font-display font-medium text-[clamp(36px,5.5vw,78px)] leading-[1.02] tracking-tight text-[#f4f1ea]">
+                          {uev.title.includes('&') ? (
+                            (() => {
+                              const [p1, ...p2] = uev.title.split('&');
+                              return (
+                                <>
+                                  {p1.trim()} {'&'} <em className="font-normal italic">{p2.join('&').trim()}</em>
+                                </>
+                              );
+                            })()
+                          ) : (
+                            uev.title
+                          )}
+                        </h3>
+                      </div>
 
-                    {/* Pie: Botón de Reserva por WhatsApp */}
-                    <div className="pt-5 border-t border-[var(--line-soft)] flex items-center justify-end">
-                      <a
-                        href={`https://wa.me/5493584852932?text=${encodeURIComponent(
-                          `Hola Subastas Insignia, deseo consultar y reservar mi lugar para el evento: "${uev.title}" (${uev.date}${uev.time ? ` a las ${uev.time}` : ''}).`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-gold text-xs py-2.5 px-5 rounded w-full sm:w-auto flex items-center justify-center gap-2 shadow"
-                      >
-                        <span>Reservar Asistencia</span>
-                        <ArrowRight size={14} />
-                      </a>
-                    </div>
-                  </AnimatedCard>
-                ))}
+                      {/* Footer: Descripción y Botón Reservar Asistencia */}
+                      <div className="flex flex-wrap items-end justify-between gap-8 md:gap-16 px-6 py-8 md:px-12 md:py-10 border-t border-white/15 bg-[#4f4e45]">
+                        {uev.description && (
+                          <p className="flex-1 min-w-[280px] max-w-[680px] m-0 text-base md:text-[18px] leading-[1.75] text-[#ece8dc]">
+                            {uev.description}
+                          </p>
+                        )}
+
+                        <a
+                          href={`https://wa.me/5493584852932?text=${encodeURIComponent(
+                            `Hola Subastas Insignia, deseo consultar y reservar mi lugar para el evento: "${uev.title}" (${uev.date}${uev.time ? ` a las ${uev.time}` : ''}).`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-4 min-h-[56px] px-8 md:px-9 bg-[#1c1b17] border border-white/15 text-white text-[13px] font-semibold tracking-[0.24em] uppercase transition-all duration-200 hover:bg-black hover:border-white/30 focus-visible:outline-2 focus-visible:outline-white shrink-0 group shadow-md"
+                        >
+                          <span>Reservar asistencia</span>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-hover:translate-x-1 shrink-0">
+                            <path d="M4 12h16M14 6l6 6-6 6"></path>
+                          </svg>
+                        </a>
+                      </div>
+                    </AnimatedCard>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -1,0 +1,277 @@
+{
+  "info": {
+    "_postman_id": "b3e945c1-1234-4567-89ab-insignia2026",
+    "name": "Insignia Subastas API",
+    "description": "Colección completa de endpoints para Subastas Insignia (Producción y Local)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://insigniasubastas.mycloud.uno/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Público",
+      "item": [
+        {
+          "name": "Health Check (Estado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Comprueba si el servidor está en línea y funcionando."
+          }
+        },
+        {
+          "name": "Obtener Todo el Catálogo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data",
+              "host": ["{{baseUrl}}"],
+              "path": ["data"]
+            },
+            "description": "Devuelve lotes, eventos, galería de fotos y fecha de cierre."
+          }
+        },
+        {
+          "name": "Ver Preofertas Públicas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bids/public",
+              "host": ["{{baseUrl}}"],
+              "path": ["bids", "public"]
+            },
+            "description": "Devuelve las ofertas máximas y cantidad de pujas de forma anónima."
+          }
+        },
+        {
+          "name": "Enviar Preoferta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lotId\": 1,\n  \"name\": \"Juan Pérez\",\n  \"phone\": \"+54 9 358 4123456\",\n  \"email\": \"juanperez@ejemplo.com\",\n  \"dni\": \"35123456\",\n  \"amount\": 600\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bids",
+              "host": ["{{baseUrl}}"],
+              "path": ["bids"]
+            },
+            "description": "Registra una oferta en una obra específica."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Autenticación (Admin)",
+      "item": [
+        {
+          "name": "Login Administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"token\", jsonData.token);",
+                  "    console.log(\"Token guardado exitosamente:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Insignia2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Inicia sesión y guarda el token JWT automáticamente en la variable {{token}}."
+          }
+        },
+        {
+          "name": "Verificar Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify"]
+            },
+            "description": "Verifica si el token actual de sesión es válido."
+          }
+        },
+        {
+          "name": "Cambiar Contraseña",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Insignia2026!\",\n  \"newPassword\": \"NuevaClaveSegura2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Administración (Protegido)",
+      "item": [
+        {
+          "name": "Ver Historial Completo de Preofertas (Con DNI/Teléfono)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bids",
+              "host": ["{{baseUrl}}"],
+              "path": ["bids"]
+            },
+            "description": "Consulta todas las ofertas recibidas con datos personales de contacto."
+          }
+        },
+        {
+          "name": "Configurar Fecha Límite de Subasta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deadline\": \"2026-12-02T00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/deadline",
+              "host": ["{{baseUrl}}"],
+              "path": ["deadline"]
+            },
+            "description": "Actualiza la fecha y hora de cierre de la subasta."
+          }
+        },
+        {
+          "name": "Subir Imagen",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload"]
+            },
+            "description": "Sube una imagen de obra o galería al servidor."
+          }
+        }
+      ]
+    }
+  ]
+}
