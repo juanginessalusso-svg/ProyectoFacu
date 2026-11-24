@@ -30,7 +30,8 @@ export default function App() {
       {!isAdmin && <Nav />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/subastas" element={<Subastas />} />
+        <Route path="/preoferta" element={<Subastas />} />
+        <Route path="/subastas" element={<Navigate to="/preoferta" replace />} />
         <Route path="/eventos" element={<Eventos />} />
         <Route path="/galeria" element={<Galeria />} />
         <Route path="/nosotros" element={<Nosotros />} />

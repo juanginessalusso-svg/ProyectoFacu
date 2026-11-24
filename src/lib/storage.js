@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   GALLERY: 'insignia_admin_gallery_v3',
   PIN: 'insignia_admin_pin_v3',
   DEADLINE: 'insignia_admin_deadline_v3',
+  GALLERY_INTRO: 'insignia_admin_gallery_intro_v1',
   TOKEN: 'insignia_admin_token',
 };
 
@@ -205,6 +206,9 @@ export async function syncFromServer() {
     if (data.deadline) {
       localStorage.setItem(STORAGE_KEYS.DEADLINE, data.deadline);
     }
+    if (data.galleryIntro && typeof data.galleryIntro === 'object') {
+      localStorage.setItem(STORAGE_KEYS.GALLERY_INTRO, JSON.stringify(data.galleryIntro));
+    }
 
     // Sincronizar preofertas públicas registradas en la base de datos
     try {
@@ -282,6 +286,33 @@ export function saveDeadline(dateString) {
     console.error('Error al guardar fecha de cierre:', err);
     return false;
   }
+}
+
+// --- TEXTO INTRODUCTORIO DE LA GALERÍA ---
+export function getGalleryIntro() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.GALLERY_INTRO);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return {
+      title: (parsed && parsed.title) || '',
+      text: (parsed && parsed.text) || '',
+    };
+  } catch (err) {
+    return { title: '', text: '' };
+  }
+}
+
+export async function saveGalleryIntro(intro) {
+  const clean = { title: intro.title || '', text: intro.text || '' };
+  localStorage.setItem(STORAGE_KEYS.GALLERY_INTRO, JSON.stringify(clean));
+  notifyChange();
+  const res = await fetch(`${API_BASE}/gallery-intro`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(clean),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return true;
 }
 
 // --- SUBASTAS (LOTES) ---

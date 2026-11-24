@@ -19,7 +19,7 @@ export default function Nav() {
 
   const navItems = [
     { label: 'Inicio', path: '/' },
-    { label: 'Subastas', path: '/subastas' },
+    { label: 'Preoferta', path: '/preoferta' },
     { label: 'Eventos', path: '/eventos' },
     { label: 'Galería', path: '/galeria' },
     { label: 'Nosotros', path: '/nosotros' },

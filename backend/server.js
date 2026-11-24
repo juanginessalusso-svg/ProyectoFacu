@@ -333,7 +333,13 @@ app.get('/api/data', (req, res) => {
     const deadlineRow = db.prepare('SELECT value FROM config WHERE key = ?').get('deadline');
     const deadline = deadlineRow ? deadlineRow.value : '2026-12-02T00:00';
 
-    res.json({ lots, events, gallery, deadline });
+    const galleryIntroRow = db.prepare('SELECT value FROM config WHERE key = ?').get('galleryIntro');
+    let galleryIntro = null;
+    if (galleryIntroRow) {
+      try { galleryIntro = JSON.parse(galleryIntroRow.value); } catch (_) { galleryIntro = null; }
+    }
+
+    res.json({ lots, events, gallery, deadline, galleryIntro });
   } catch (err) {
     console.error('Error al consultar datos:', err);
     res.status(500).json({ error: 'Error al obtener datos' });
@@ -420,6 +426,21 @@ app.put('/api/deadline', requireAuth, (req, res) => {
     res.json({ success: true, deadline });
   } catch (err) {
     res.status(500).json({ error: 'Error guardando fecha límite' });
+  }
+});
+
+// Guardar texto introductorio de la Galería (Protegido)
+app.put('/api/gallery-intro', requireAuth, (req, res) => {
+  const { title, text } = req.body || {};
+  const intro = {
+    title: String(title || '').slice(0, 200),
+    text: String(text || '').slice(0, 5000),
+  };
+  try {
+    db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run('galleryIntro', JSON.stringify(intro));
+    res.json({ success: true, galleryIntro: intro });
+  } catch (err) {
+    res.status(500).json({ error: 'Error guardando texto de la galería' });
   }
 });
 

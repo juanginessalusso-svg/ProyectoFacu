@@ -20,8 +20,8 @@
   --bg-dark: #3a3930;
   --cream: #ece6d4;
   --cream-soft: #d8d2bf;
-  --serif: 'Cormorant Garamond', serif;
-  --display: 'Cormorant Garamond', Georgia, serif;
+  --serif: 'Montserrat', system-ui, -apple-system, sans-serif;
+  --display: 'Montserrat', system-ui, -apple-system, sans-serif;
   --sans: 'Montserrat', system-ui, -apple-system, sans-serif;
   --font-subastas: 'Copperplate Gothic 29 BC', 'Copperplate Gothic Bold', 'Copperplate Gothic Light', 'Copperplate Gothic', 'Copperplate', serif;
   --font-insignia: 'Donau', 'Donau Neue', 'Donau Uppercase Neue', 'Donau Alte', 'Donau-Regular', var(--display);
@@ -153,7 +153,7 @@ textarea::placeholder {
 @keyframes kbB { from { transform: scale(1.04) translate(-0.5%, 0); } to { transform: scale(1); } }
 .hero-shade { position: absolute; inset: 0; z-index: 3; background: linear-gradient(180deg, rgba(8, 7, 6, 0.25) 0%, rgba(8, 7, 6, 0.1) 35%, rgba(8, 7, 6, 0.65) 75%, var(--ink) 100%); pointer-events: none; }
 .hero-inner { position: relative; z-index: 7; width: 100%; max-width: 1240px; padding-bottom: clamp(32px, 6vw, 64px); }
-.hero-title { font-family: var(--display); font-weight: 300; font-size: clamp(2.4rem, 5.2vw, 4.4rem); line-height: 1.04; letter-spacing: -0.015em; margin: 0; max-width: 600px; color: #ffffff; text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.95); text-wrap: balance; }
+.hero-title { font-family: var(--display); font-weight: 700; font-size: clamp(2.4rem, 5.2vw, 4.4rem); line-height: 1.04; letter-spacing: -0.015em; margin: 0; max-width: 600px; color: #ffffff; text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95), 0 2px 10px rgba(0, 0, 0, 0.95); text-wrap: balance; }
 .hero-title em { font-style: italic; font-weight: 400; color: #e2d7c0; text-shadow: 0 0 36px rgba(226, 215, 192, 0.35), 0 4px 28px rgba(0, 0, 0, 0.95); }
 .rise { opacity: 0; animation: rise 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
 @keyframes rise { from { opacity: 0; transform: translateY(18px); letter-spacing: 0.04em; } to { opacity: 1; transform: none; } }
@@ -257,14 +257,14 @@ textarea::placeholder {
 
 .m3-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 28px;
   padding: 24px 0 60px;
 }
 
 .m3-card {
-  display: grid;
-  grid-template-columns: 44% 1fr;
+  display: flex;
+  flex-direction: column;
   background: #4a4a42;
   border: 1px solid var(--line);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -305,13 +305,29 @@ textarea::placeholder {
   padding: 26px 26px 24px;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  text-align: center;
+}
+
+.m3-info .m3-top {
+  justify-content: center;
+  gap: 10px;
+}
+
+.m3-info .m3-dl {
+  grid-template-columns: 1fr 1fr;
+  text-align: left;
+}
+
+.m3-info .m3-dl dt {
+  text-align: right;
 }
 
 .m3-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--sans);
   font-size: 11px;
   color: var(--ivory-dim);
   letter-spacing: 0.1em;
@@ -352,7 +368,7 @@ textarea::placeholder {
 
 .m3-lbl {
   display: block;
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--sans);
   font-size: 10px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -407,14 +423,14 @@ textarea::placeholder {
   transform: scale(0.99);
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .m3-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 560px) {
-  .m3-card {
+@media (max-width: 680px) {
+  .m3-grid {
     grid-template-columns: 1fr;
   }
   .m3-frame {
@@ -507,7 +523,7 @@ textarea::placeholder {
 }
 
 .m3g-sub {
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--sans);
   font-size: 11px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -642,7 +658,7 @@ textarea::placeholder {
 }
 .m2-head h2 {
   margin: 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--sans);
   font-weight: 500;
   font-size: clamp(38px, 5.5vw, 68px);
   line-height: 1.05;
@@ -711,7 +727,7 @@ textarea::placeholder {
   position: relative;
   z-index: 2;
   padding: 28px 28px 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--sans);
   font-size: 24px;
   font-weight: 500;
   letter-spacing: 0.12em;
@@ -737,7 +753,7 @@ textarea::placeholder {
 }
 .m2-panel h3 {
   margin: 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--sans);
   font-weight: 500;
   font-size: 34px;
   color: #fbf8f0;
@@ -847,9 +863,6 @@ textarea::placeholder {
   height: 340px;
   overflow: hidden;
 }
-.art-row:nth-child(even) .art-row__media {
-  order: 2;
-}
 .art-row__media img {
   width: 100%;
   height: 100%;
@@ -945,9 +958,6 @@ textarea::placeholder {
 @media (max-width: 960px) {
   .art-row {
     gap: 28px;
-  }
-  .art-row:nth-child(even) .art-row__media {
-    order: 0;
   }
   .art-row__media {
     flex: 1 1 100%;

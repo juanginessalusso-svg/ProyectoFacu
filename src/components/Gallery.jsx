@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Lightbox from './Lightbox';
 import { cx } from '../lib/format';
-import { getGalleryPhotos } from '../lib/storage';
+import { getGalleryPhotos, getGalleryIntro } from '../lib/storage';
 import { InsigniaMonogram } from './BrandLogo';
 
 // Ratios aspect de diseño editorial por posición
@@ -83,10 +83,12 @@ function GalleryRowItem({ photo, index, onOpen }) {
 export default function Gallery() {
   const [photos, setPhotos] = useState(() => getGalleryPhotos());
   const [lb, setLb] = useState(null);
+  const [intro, setIntro] = useState(() => getGalleryIntro());
 
   useEffect(() => {
     const handleDataChange = () => {
       setPhotos(getGalleryPhotos());
+      setIntro(getGalleryIntro());
     };
     window.addEventListener('insignia-data-change', handleDataChange);
     return () => window.removeEventListener('insignia-data-change', handleDataChange);
@@ -107,6 +109,20 @@ export default function Gallery() {
           <p className="text-base sm:text-lg md:text-xl text-[var(--ivory-dim)] font-medium tracking-wide mt-3">
             Alberdi 355 · Río Cuarto, Córdoba
           </p>
+          {(intro.title || intro.text) && (
+            <div className="mt-6 max-w-3xl">
+              {intro.title && (
+                <h2 className="text-lg sm:text-xl text-[var(--ivory)] font-bold tracking-wide">
+                  {intro.title}
+                </h2>
+              )}
+              {intro.text && (
+                <p className="text-sm sm:text-base text-[var(--ivory-dim)] leading-relaxed mt-2 whitespace-pre-line">
+                  {intro.text}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* FILAS DE FOTOGRAMAS EDITORIALES CON EFECTO CORTINA */}

@@ -12,7 +12,9 @@ import {
   getGalleryPhotos,
   saveGalleryPhotos,
   fileToDataUrl,
-  apiUploadImage
+  apiUploadImage,
+  getGalleryIntro,
+  saveGalleryIntro
 } from '../../lib/storage';
 
 export default function AdminGaleria({ onNotify }) {
@@ -21,6 +23,9 @@ export default function AdminGaleria({ onNotify }) {
   const [photoForm, setPhotoForm] = useState({ id: '', src: '', cap: '', cls: 'lg:col-span-6', h: 'h-[320px] md:h-[400px]' });
   const [photoPreview, setPhotoPreview] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [introForm, setIntroForm] = useState(() => getGalleryIntro());
+  const [introDirty, setIntroDirty] = useState(false);
+  const [isSavingIntro, setIsSavingIntro] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -31,6 +36,29 @@ export default function AdminGaleria({ onNotify }) {
 
   const loadData = () => {
     setPhotos(getGalleryPhotos());
+  };
+
+  // Si llegan datos del servidor y el usuario no está editando, refrescar el formulario
+  useEffect(() => {
+    const handle = () => {
+      if (!introDirty) setIntroForm(getGalleryIntro());
+    };
+    window.addEventListener('insignia-data-change', handle);
+    return () => window.removeEventListener('insignia-data-change', handle);
+  }, [introDirty]);
+
+  const handleSaveIntro = async (e) => {
+    e.preventDefault();
+    try {
+      setIsSavingIntro(true);
+      await saveGalleryIntro(introForm);
+      setIntroDirty(false);
+      onNotify('Texto de la galería guardado');
+    } catch (err) {
+      alert('No se pudo guardar el texto en el servidor: ' + err.message);
+    } finally {
+      setIsSavingIntro(false);
+    }
   };
 
   const handleOpenEditPhoto = (photo, index) => {
@@ -128,6 +156,60 @@ export default function AdminGaleria({ onNotify }) {
           Agregar Fotografía
         </button>
       </div>
+
+      {/* Texto introductorio que aparece al inicio de la página Galería */}
+      <form
+        onSubmit={handleSaveIntro}
+        className="bg-[var(--ink-2)]/40 p-5 rounded-lg border border-[var(--line-soft)] space-y-3 text-sm"
+      >
+        <div>
+          <h3 className="text-base font-serif text-[var(--ivory)]">Información al inicio de la Galería</h3>
+          <p className="text-xs text-[var(--ivory-dim)] mt-1">
+            Se muestra debajo del título "Galería Insignia". Dejalo vacío para no mostrar nada.
+          </p>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
+            Subtítulo (opcional)
+          </label>
+          <input
+            type="text"
+            value={introForm.title}
+            maxLength={200}
+            onChange={(e) => {
+              setIntroForm({ ...introForm, title: e.target.value });
+              setIntroDirty(true);
+            }}
+            placeholder="Ej: Muestra colectiva de noviembre"
+            className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
+            Texto
+          </label>
+          <textarea
+            rows={5}
+            value={introForm.text}
+            maxLength={5000}
+            onChange={(e) => {
+              setIntroForm({ ...introForm, text: e.target.value });
+              setIntroDirty(true);
+            }}
+            placeholder="Horarios, muestra actual, información para visitantes…"
+            className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none resize-y"
+          />
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isSavingIntro}
+            className="btn-gold text-xs py-2 px-4 rounded disabled:opacity-60"
+          >
+            {isSavingIntro ? 'Guardando…' : 'Guardar texto'}
+          </button>
+        </div>
+      </form>
 
       {/* Cuadrícula de fotos para administración */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">

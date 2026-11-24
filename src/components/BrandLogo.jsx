@@ -108,7 +108,7 @@ export default function BrandLogo({
       <div className="flex flex-col justify-center items-start leading-none py-0.5">
         <SubastasWordmark className="h-[8px] sm:h-[9px] w-auto text-[#c7c5bc] transition-colors group-hover:text-[#ffffff]" />
         <InsigniaWordmark className="h-[18px] sm:h-[21px] w-auto text-white my-[2px] transition-colors" />
-        <ObrasWordmark className="h-[6px] sm:h-[7px] w-auto text-[#b2b0a6] transition-colors group-hover:text-[#d0c7b7]" />
+        <ObrasWordmark className="h-[8px] sm:h-[9px] w-auto text-[#b2b0a6] transition-colors group-hover:text-[#d0c7b7]" />
       </div>
     </div>
   );

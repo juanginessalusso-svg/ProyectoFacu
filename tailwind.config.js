@@ -21,10 +21,12 @@ export default {
         bronze: '#707063'
       },
       fontFamily: {
-        display: ['Cormorant Garamond', 'Georgia', 'serif'],
+        display: ['Montserrat', 'system-ui', 'sans-serif'],
+        serif: ['Montserrat', 'system-ui', 'sans-serif'],
+        mono: ['Montserrat', 'system-ui', 'sans-serif'],
         sans: ['Montserrat', 'system-ui', 'sans-serif'],
         subastas: ['"Copperplate Gothic 29 BC"', '"Copperplate Gothic Bold"', '"Copperplate Gothic"', 'Copperplate', 'serif'],
-        insignia: ['Donau', '"Donau Neue"', '"Donau Uppercase Neue"', '"Donau Alte"', '"Donau-Regular"', '"Cormorant Garamond"', 'Georgia', 'serif'],
+        insignia: ['Donau', '"Donau Neue"', '"Donau Uppercase Neue"', '"Donau Alte"', '"Donau-Regular"', 'Montserrat', 'sans-serif'],
       }
     },
   },

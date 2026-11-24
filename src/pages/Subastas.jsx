@@ -149,7 +149,7 @@ export default function Subastas() {
   });
 
   useEffect(() => {
-    document.title = 'Subastas & Catálogo Inaugural · Subastas Insignia';
+    document.title = 'Preoferta · Catálogo Inaugural · Subastas Insignia';
 
     const handleDataChange = () => {
       setLots(getLots());
@@ -452,7 +452,7 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
             <div>
               <p className="eyebrow">Catálogo & Preofertas</p>
               <h1 className="h2" style={{ fontSize: 'clamp(2.8rem, 6.2vw, 4.6rem)' }}>
-                Subas<em>tas</em>
+                Preofer<em>ta</em>
               </h1>
             </div>
           </div>
@@ -612,7 +612,7 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                   <Lock size={28} />
                 </div>
                 <h3 className="font-serif text-2xl md:text-3xl text-[var(--ivory)] font-medium mb-3">
-                  Catálogo Oficial de Subastas
+                  Catálogo Oficial de Preoferta
                 </h3>
                 <p className="text-sm text-[var(--ivory-dim)] max-w-md mx-auto leading-relaxed mb-6">
                   Para ingresar y consultar las 23 obras disponibles, sus bases y participar en las preofertas de la colección inaugural, completá tu acreditación obligatoria.
@@ -661,7 +661,6 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                     <article key={lot.id} className="m3-card group">
                       {/* CUADRO / MARCO EXHIBIDOR CON MARCA DE AGUA */}
                       <div className="m3-frame">
-                        <span className="m3-no" aria-hidden="true">{lotNumberStr}</span>
 
                         <div
                           className="relative flex items-center justify-center w-full h-full cursor-pointer z-[2]"
@@ -716,18 +715,20 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                         <div className="flex-1 min-h-[16px]"></div>
 
                         <div className="m3-price">
-                          <span className="m3-lbl">Precio base</span>
-                          <strong>{lot.basePrice}</strong>
-                          <div className="m3-last">
-                            Último pujante:{' '}
-                            {highestBid ? (
-                              <b className="text-[var(--ivory)] font-semibold not-italic">
-                                $USD {highestBid.toLocaleString()}
-                              </b>
-                            ) : (
-                              <i>sin pujas aún</i>
-                            )}
-                          </div>
+                          {highestBid ? (
+                            <>
+                              <span className="m3-lbl">Última oferta</span>
+                              <strong>$USD {highestBid.toLocaleString()}</strong>
+                            </>
+                          ) : (
+                            <>
+                              <span className="m3-lbl">Precio base</span>
+                              <strong>{lot.basePrice}</strong>
+                              <div className="m3-last">
+                                <i>Sin ofertas aún</i>
+                              </div>
+                            </>
+                          )}
                         </div>
 
                         <button
@@ -784,17 +785,18 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                     {activePreofferLot.artist}
                   </p>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs font-mono">
-                    <span className="text-[var(--ivory-dim)]">
-                      Precio Base: <strong className="text-[var(--ivory)] font-sans">{activePreofferLot.basePrice}</strong>
-                    </span>
-                    <span className="text-[var(--gold)] font-medium">
-                      Último pujante:{' '}
-                      <strong className="text-[var(--gold-hi)]">
-                        {currentHighest
-                          ? `$USD ${currentHighest.toLocaleString()}`
-                          : 'Sin pujas previas'}
-                      </strong>
-                    </span>
+                    {currentHighest ? (
+                      <span className="text-[var(--gold)] font-medium">
+                        Última oferta:{' '}
+                        <strong className="text-[var(--gold-hi)]">
+                          $USD {currentHighest.toLocaleString()}
+                        </strong>
+                      </span>
+                    ) : (
+                      <span className="text-[var(--ivory-dim)]">
+                        Precio Base: <strong className="text-[var(--ivory)] font-sans">{activePreofferLot.basePrice}</strong>
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1016,7 +1018,7 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
       {/* MODAL DE ACREDITACIÓN OBLIGATORIA PARA INGRESAR A SUBASTAS */}
       {showGateModal && (
         <Modal
-          label="Acreditación previa para ingresar a Subastas"
+          label="Acreditación previa para ingresar a Preoferta"
           onClose={() => {
             setShowGateModal(false);
           }}
@@ -1033,7 +1035,7 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                 Acreditación de Postulante
               </h3>
               <p className="text-xs text-[var(--ivory-dim)] max-w-md mx-auto leading-relaxed mt-2">
-                Para ingresar a la sección de subastas y participar en las preofertas de la colección inaugural, por favor completá tus datos de contacto e identificación.
+                Para ingresar a la sección de preoferta y participar en las preofertas de la colección inaugural, por favor completá tus datos de contacto e identificación.
               </p>
             </div>
 
@@ -1140,7 +1142,7 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                   className="btn-gold !py-2.5 !px-6 text-xs gap-2 w-full sm:w-auto justify-center order-1 sm:order-2"
                 >
                   <ShieldCheck size={14} />
-                  <span>Ingresar al Catálogo de Subastas</span>
+                  <span>Ingresar al Catálogo de Preoferta</span>
                 </button>
               </div>
             </form>
