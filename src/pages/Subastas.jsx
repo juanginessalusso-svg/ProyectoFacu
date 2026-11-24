@@ -517,44 +517,18 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
           {/* CATÁLOGO DE LOTES DISPONIBLES · MODELO 3 EDITORIAL VERDE */}
           <div id="catalogo" className="mt-12">
             {accreditedUser && (
-              <div className="mb-8 p-3.5 bg-[#3e3e37]/80 border border-[var(--gold)]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2.5 text-[var(--ivory)]">
-                  <div className="w-7 h-7 rounded-full bg-[var(--gold)]/20 border border-[var(--gold)]/50 flex items-center justify-center text-[var(--gold-hi)] shrink-0">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div>
-                    <span className="text-[var(--gold-hi)] font-mono uppercase tracking-wider text-[10px] block">
-                      Acreditación Verificada
-                    </span>
-                    <span className="font-medium text-[var(--ivory)]">
-                      {accreditedUser.name}
-                    </span>
-                    <span className="text-[var(--ivory-dim)] ml-2">
-                      · DNI: {accreditedUser.dni}
-                    </span>
-                  </div>
+              <div className="mb-8 p-3.5 bg-[#3e3e37]/80 border border-[var(--gold)]/30 flex items-center gap-3 text-xs">
+                <div className="w-8 h-8 rounded-full bg-[var(--gold)]/20 border border-[var(--gold)]/50 flex items-center justify-center text-[var(--gold-hi)] shrink-0">
+                  <ShieldCheck size={18} />
                 </div>
-                <div className="flex items-center gap-3 self-start sm:self-auto">
-                  <button
-                    type="button"
-                    onClick={() => setShowGateModal(true)}
-                    className="text-[11px] font-mono uppercase tracking-wider text-[var(--gold-hi)] hover:underline"
-                  >
-                    Modificar mis datos
-                  </button>
-                  <span className="text-[var(--line)]">|</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      localStorage.removeItem('insignia_accredited_user');
-                      setAccreditedUser(null);
-                      setShowGateModal(true);
-                    }}
-                    className="text-[11px] font-mono uppercase tracking-wider text-red-400 hover:text-red-300 hover:underline"
-                    title="Cerrar acreditación y volver a solicitar datos"
-                  >
-                    Desvincular
-                  </button>
+                <div>
+                  <span className="text-[var(--gold-hi)] font-mono uppercase tracking-wider text-[10px] block font-semibold">
+                    Acreditación Verificada
+                  </span>
+                  <div className="text-xs text-[var(--ivory)] mt-0.5">
+                    <span className="font-medium">{accreditedUser.name}</span>
+                    <span className="text-[var(--ivory-dim)] ml-2 font-mono">· DNI: {accreditedUser.dni}</span>
+                  </div>
                 </div>
               </div>
             )}

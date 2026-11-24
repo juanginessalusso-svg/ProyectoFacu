@@ -155,7 +155,7 @@ export const ARTISTS = [
     discipline: 'Pintura figurativa y óleo clásico',
     bio: 'Nacido en Buenos Aires en 1940, inició su formación artística desde muy joven con profesores de Bellas Artes. Su producción se destaca por el virtuosismo en el óleo clásico, la figura animal y la calidez en lienzos de colección.',
     portrait: '/img/artista-bonati.jpg',
-    portraitPosition: 'center top',
+    portraitPosition: 'center 38%',
     works: [
       {
         title: 'Compañeros',

@@ -1072,8 +1072,8 @@ export default function AdminSubastas({ onNotify }) {
       )}
       {/* Modal para ver registro de acreditaciones de postulantes */}
       {isAccreditationsModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[var(--ink-3)] border border-[var(--line)] rounded-xl max-w-4xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+          <div className="bg-[var(--ink-3)] border border-[var(--line)] rounded-xl max-w-6xl w-full p-6 space-y-5 shadow-2xl max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-[var(--line-soft)] pb-3">
               <div>
                 <h3 className="font-serif text-xl text-[var(--ivory)] font-medium flex items-center gap-2">
@@ -1107,23 +1107,23 @@ export default function AdminSubastas({ onNotify }) {
                   </p>
                 </div>
               ) : (
-                <div className="border border-[var(--line-soft)] rounded-lg overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs min-w-[700px]">
+                <div className="border border-[var(--line-soft)] rounded-lg overflow-x-auto lg:overflow-x-visible">
+                  <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-[var(--ink-2)] border-b border-[var(--line-soft)] text-[var(--gold)] font-mono uppercase tracking-wider text-[11px]">
-                        <th className="p-3">#</th>
+                        <th className="p-3 w-10 text-center">#</th>
                         <th className="p-3">Nombre y Apellido</th>
                         <th className="p-3">DNI</th>
                         <th className="p-3">Contacto</th>
                         <th className="p-3">Obras / Preofertas</th>
                         <th className="p-3">Fecha</th>
-                        <th className="p-3 text-right">Acción</th>
+                        <th className="p-3 text-center w-16">Acción</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--line-soft)]">
                       {accreditationsList.map((item, idx) => (
                         <tr key={item.id || idx} className="hover:bg-[var(--ink-2)]/50 transition-colors align-top">
-                          <td className="p-3 font-mono text-[var(--ivory-dim)]">
+                          <td className="p-3 font-mono text-[var(--ivory-dim)] text-center">
                             {String(idx + 1).padStart(2, '0')}
                           </td>
                           <td className="p-3 font-medium text-[var(--ivory)]">
@@ -1132,10 +1132,10 @@ export default function AdminSubastas({ onNotify }) {
                           <td className="p-3 font-mono text-[var(--gold-hi)] font-semibold whitespace-nowrap">
                             {item.dni}
                           </td>
-                          <td className="p-3 space-y-1 whitespace-nowrap">
+                          <td className="p-3 space-y-1">
                             <div className="flex items-center gap-1.5 text-[var(--ivory)]">
                               <Mail size={12} className="text-[var(--gold)] shrink-0" />
-                              <a href={`mailto:${item.email}`} className="hover:underline">
+                              <a href={`mailto:${item.email}`} className="hover:underline truncate max-w-[170px]" title={item.email}>
                                 {item.email}
                               </a>
                             </div>
@@ -1151,7 +1151,7 @@ export default function AdminSubastas({ onNotify }) {
                               </a>
                             </div>
                           </td>
-                          <td className="p-3 min-w-[220px]">
+                          <td className="p-3 min-w-[200px]">
                             {item.bids && item.bids.length > 0 ? (
                               <div className="space-y-1.5">
                                 {item.bids.map((b, bIdx) => (
@@ -1182,14 +1182,14 @@ export default function AdminSubastas({ onNotify }) {
                           <td className="p-3 font-mono text-[var(--ivory-dim)] text-[11px] whitespace-nowrap">
                             {item.created_at ? new Date(item.created_at).toLocaleString() : '—'}
                           </td>
-                          <td className="p-3 text-right whitespace-nowrap">
+                          <td className="p-3 text-center whitespace-nowrap">
                             <button
                               type="button"
                               onClick={() => handleDeleteAccreditation(item.id, item.name)}
-                              className="p-1.5 rounded text-[var(--ivory-dim)] hover:text-red-400 hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-colors"
+                              className="p-2 rounded text-[var(--ivory-dim)] hover:text-red-400 hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-colors inline-flex items-center justify-center"
                               title={`Eliminar acreditación de ${item.name}`}
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={16} />
                             </button>
                           </td>
                         </tr>

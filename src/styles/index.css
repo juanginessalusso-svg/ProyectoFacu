@@ -279,7 +279,7 @@ textarea::placeholder {
 .m3-frame {
   position: relative;
   background: #3e3e37;
-  min-height: 360px;
+  min-height: 330px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -306,32 +306,19 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   flex: 1;
-  text-align: center;
-}
-
-.m3-info .m3-top {
-  justify-content: center;
-  gap: 10px;
-}
-
-.m3-info .m3-dl {
-  grid-template-columns: 1fr 1fr;
-  text-align: left;
-}
-
-.m3-info .m3-dl dt {
   text-align: right;
 }
 
 .m3-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   font-family: var(--sans);
   font-size: 11px;
   color: var(--ivory-dim);
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  gap: 12px;
 }
 
 .m3-title {
@@ -341,29 +328,35 @@ textarea::placeholder {
   line-height: 1.15;
   color: var(--ivory);
   margin: 14px 0 14px;
+  text-align: right;
 }
 
 .m3-dl {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto auto;
+  justify-content: end;
   gap: 6px 14px;
   font-size: 12.5px;
   line-height: 1.5;
+  text-align: right;
 }
 
 .m3-dl dt {
   color: var(--ivory-dim);
+  text-align: right;
 }
 
 .m3-dl dd {
   color: var(--ivory);
   font-weight: 500;
+  text-align: right;
 }
 
 .m3-price {
   border-top: 1px solid var(--line);
   margin-top: 22px;
   padding-top: 16px;
+  text-align: right;
 }
 
 .m3-lbl {
@@ -373,6 +366,7 @@ textarea::placeholder {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--ivory-dim);
+  text-align: right;
 }
 
 .m3-price strong {
@@ -382,11 +376,13 @@ textarea::placeholder {
   display: block;
   margin: 2px 0 4px;
   color: #ffffff;
+  text-align: right;
 }
 
 .m3-last {
   font-size: 12px;
   color: var(--ivory-dim);
+  text-align: right;
 }
 
 .m3-last i {
@@ -801,18 +797,24 @@ textarea::placeholder {
 .lb-nav.r { right: 10px; }
 
 /* ============================================================
-   SECCIÓN ARTISTAS DE LA COLECCIÓN (Diseño Editorial + Visor)
+   SECCIÓN ARTISTAS DE LA COLECCIÓN (Carrusel de Tarjetas + Modal)
    ============================================================ */
 .artistas {
   --line: rgba(236, 230, 212, 0.18);
   background: var(--bg);
   color: var(--cream);
   font-family: var(--sans);
-  padding: 96px clamp(20px, 6vw, 80px) 120px;
+  padding: 80px clamp(20px, 6vw, 80px) 110px;
 }
 .artistas__inner {
   max-width: 1240px;
   margin: 0 auto;
+}
+.artistas__top-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
 }
 .artistas__eyebrow {
   display: flex;
@@ -832,257 +834,490 @@ textarea::placeholder {
   color: var(--cream-soft);
 }
 .artistas__title {
-  margin: 24px 0 0;
+  margin: 20px 0 0;
   font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(48px, 7vw, 92px);
+  font-weight: 700;
+  font-size: clamp(38px, 5.5vw, 72px);
   line-height: 1.05;
   color: var(--cream);
+  letter-spacing: -0.015em;
 }
 .artistas__title em {
   font-style: italic;
   font-weight: 400;
 }
-.artistas__list {
-  margin-top: 64px;
-  display: flex;
-  flex-direction: column;
+.artistas__intro {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--cream-soft);
+  max-width: 660px;
 }
 
-.art-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 40px 80px;
-  padding: 40px 0;
-  border-top: 1px solid var(--line);
-}
-.art-row__media {
-  flex: 0 1 440px;
-  min-height: 340px;
-  height: 340px;
+/* Carrusel Marquee infinito (Scroll automático continuo) */
+.art-marquee-container {
+  margin-top: 48px;
+  position: relative;
+  width: 100%;
   overflow: hidden;
+  padding: 10px 0 20px;
+  mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
 }
-.art-row__media img {
+
+.art-marquee-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: artMarqueeScroll 48s linear infinite;
+  will-change: transform;
+}
+
+/* Se detiene suavemente cuando el usuario apoya el mouse en cualquier artista */
+.art-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes artMarqueeScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 12px));
+  }
+}
+
+.art-card-wrapper {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+@media (min-width: 1100px) {
+  .art-card-wrapper {
+    flex: 0 0 260px;
+  }
+}
+
+/* Tarjeta rectangular (Estilo vertical) */
+.art-box {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: #141310;
+  border: 1px solid rgba(236, 230, 212, 0.16);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.art-card-wrapper:hover .art-box,
+.art-card-wrapper:focus-visible .art-box {
+  transform: translateY(-4px);
+  border-color: rgba(236, 230, 212, 0.45);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* Estado 1 (Default): Fondo oscuro con nombres centrados */
+.art-box__front {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  text-align: center;
+  background: #13120f;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 1;
+}
+.art-card-wrapper:hover .art-box__front {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+.art-box__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0 8px;
+}
+.art-box__first {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream-soft);
+  display: block;
+}
+.art-box__last {
+  font-family: var(--sans);
+  font-size: clamp(16px, 1.8vw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+  display: block;
+  line-height: 1.2;
+  word-break: normal;
+  text-wrap: balance;
+}
+
+/* Estado 2 (Hover): Ficha catálogo clara con obra y texto vertical */
+.art-box__back {
+  position: absolute;
+  inset: 0;
+  background: #fbf9f4;
+  color: #1a1915;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 14px 14px;
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 2;
+}
+.art-card-wrapper:hover .art-box__back,
+.art-card-wrapper:focus-visible .art-box__back {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.art-box__watermark {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  position: absolute;
+  left: 8px;
+  bottom: 24px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: #7b786d;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.art-box__artwork-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 20px;
+  padding-right: 8px;
+  min-height: 0;
+}
+.art-box__artwork-img {
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.18));
+}
+.art-box__artwork-ph {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: #888;
+}
+
+.art-box__preview-caption {
+  padding-left: 20px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.art-box__preview-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #2b2923;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Leyenda debajo de la tarjeta */
+.art-card-caption {
+  margin-top: 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--cream);
+  text-align: center;
+  transition: color 0.2s ease;
+  letter-spacing: -0.01em;
+}
+.art-card-wrapper:hover .art-card-caption {
+  color: #ffffff;
+}
+
+/* ---------- Modal Ficha de Artista (Pantallita) ---------- */
+.art-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgba(12, 11, 9, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 36px);
+  animation: artFadeIn 0.3s ease;
+}
+@keyframes artFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.art-modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  max-height: calc(100dvh - 48px);
+  background: #3e3d34;
+  border: 1px solid rgba(236, 230, 212, 0.22);
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  overflow: hidden;
+  animation: artScaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--cream);
+  font-family: var(--sans);
+}
+@keyframes artScaleIn {
+  from { opacity: 0; transform: scale(0.97) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.art-modal-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  background: #35342c;
+  flex-shrink: 0;
+  gap: 16px;
+}
+.art-modal-topbar__eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: var(--cream-soft);
+  text-transform: uppercase;
+}
+.art-modal-close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(236, 230, 212, 0.35);
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.art-modal-close-btn:hover {
+  background: rgba(236, 230, 212, 0.12);
+  border-color: var(--cream);
+  color: #ffffff;
+}
+
+.art-modal-body {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+}
+
+/* Columna Izquierda: Artista */
+.art-modal-col--bio {
+  padding: 36px 36px 44px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.art-modal-portrait-wrap {
+  width: 100%;
+  height: 310px;
+  background: #25241e;
+  overflow: hidden;
+  border: 1px solid rgba(236, 230, 212, 0.18);
+  border-radius: 2px;
+}
+.art-modal-portrait {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
   display: block;
 }
-.art-row__text {
-  flex: 1 1 360px;
-  min-width: 0;
+.art-modal-name {
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(26px, 3.2vw, 36px);
+  line-height: 1.1;
+  color: var(--cream);
+  letter-spacing: -0.015em;
+}
+.art-modal-meta {
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cream-soft);
+  opacity: 0.85;
+}
+.art-modal-bio-text {
+  margin: 16px 0 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--cream-soft);
+}
+
+/* Columna Derecha: Obra */
+.art-modal-col--work {
+  padding: 36px 36px 44px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  background: #39382f;
 }
-.art-row__name {
-  margin: 0;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(40px, 5vw, 64px);
-  line-height: 1.02;
-  color: var(--cream);
-}
-.art-row__meta {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .18em;
-  line-height: 1.6;
-  text-transform: uppercase;
-  color: var(--cream);
-}
-.art-row__bio {
-  margin: 0;
-  max-width: 560px;
-  font-size: 17px;
-  line-height: 1.65;
-  color: var(--cream-soft);
-}
-.art-row__work {
-  margin: 0;
-  padding-top: 16px;
-  max-width: 560px;
-  border-top: 1px solid var(--line);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .18em;
-  color: var(--cream-soft);
-  text-transform: uppercase;
-}
-
-.artistas .ph,
-.vo .ph {
-  width: 100%;
-  height: 100%;
-  background: var(--bg-dark);
+.art-modal-work-badge {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .3em;
-  color: #cfc9b6;
-  text-align: center;
-  padding: 16px;
-}
-
-.artistas .btn {
-  align-self: flex-start;
-  height: 44px;
-  padding: 0 20px;
-  display: inline-flex;
-  align-items: center;
-  background: transparent;
-  color: var(--cream);
-  border: 1px solid rgba(236, 230, 212, .5);
-  font-family: var(--sans);
-  font-size: 11px;
+  justify-content: space-between;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: .22em;
-  cursor: pointer;
-  transition: background .2s, border-color .2s;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cream-soft);
 }
-.artistas .btn:hover {
-  background: rgba(236, 230, 212, .1);
-  border-color: var(--cream);
+.art-modal-work-count {
+  font-size: 10px;
+  opacity: 0.75;
 }
-.artistas .btn:focus-visible,
-.vo button:focus-visible {
-  outline: 2px solid var(--cream);
-  outline-offset: 3px;
-}
-
-@media (max-width: 960px) {
-  .art-row {
-    gap: 28px;
-  }
-  .art-row__media {
-    flex: 1 1 100%;
-    height: 300px;
-    min-height: 300px;
-  }
-}
-
-/* ---------- Visor de la obra ---------- */
-.vo {
-  --line: rgba(236, 230, 212, 0.18);
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(10, 10, 8, .92);
-  display: flex;
-}
-.vo[hidden] {
-  display: none;
-}
-.vo__panel {
+.art-modal-work-frame {
   position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 72px clamp(16px, 4vw, 56px) 24px;
-  min-width: 0;
-  outline: none;
-}
-.vo__close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  height: 44px;
-  padding: 0 16px;
-  background: transparent;
-  color: var(--cream);
-  border: 0;
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .22em;
-  cursor: pointer;
-  transition: color .2s;
-}
-.vo__close:hover {
-  color: #ffffff;
-}
-.vo__stage {
-  flex: 1;
-  min-height: 0;
+  width: 100%;
+  height: 330px;
+  background: #25241e;
+  border: 1px solid rgba(236, 230, 212, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  overflow: hidden;
+  padding: 12px;
 }
-.vo__fig {
-  margin: 0;
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.vo__fig img {
+.art-modal-work-img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   display: block;
 }
-.vo__fig .ph {
-  max-width: 900px;
-  height: min(60vh, 560px);
-}
-.vo__nav {
-  flex: 0 0 auto;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--cream);
-  border: 1px solid rgba(236, 230, 212, .5);
-  font-size: 20px;
-  cursor: pointer;
+.art-modal-work-nav {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background .2s, border-color .2s;
-}
-.vo__nav:hover {
-  background: rgba(236, 230, 212, .1);
-  border-color: var(--cream);
-}
-.vo__nav[hidden] {
-  display: none;
-}
-.vo__cap {
-  padding-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 8px 24px;
+  padding: 0 10px;
+  pointer-events: none;
 }
-.vo__title {
+.art-modal-work-arrow {
+  pointer-events: auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(20, 19, 16, 0.78);
+  border: 1px solid rgba(236, 230, 212, 0.35);
+  color: var(--cream);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.art-modal-work-arrow:hover {
+  background: rgba(20, 19, 16, 0.95);
+  border-color: var(--cream);
+  color: #ffffff;
+}
+.art-modal-work-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.art-modal-work-title {
   margin: 0;
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(28px, 3.4vw, 40px);
-  line-height: 1.1;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: clamp(20px, 2.4vw, 26px);
   color: var(--cream);
 }
-.vo__sub {
+.art-modal-work-technique {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cream-soft);
+  opacity: 0.9;
+}
+.art-modal-work-desc {
   margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--cream-soft);
+}
+
+.art-modal-ph {
+  width: 100%;
+  height: 100%;
+  background: #25241e;
+  display: grid;
+  place-items: center;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: .18em;
-  color: var(--cream-soft);
-  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #999;
 }
-@media (max-width: 600px) {
-  .vo__nav {
-    width: 44px;
-    height: 44px;
+
+@media (max-width: 900px) {
+  .art-modal-body {
+    grid-template-columns: 1fr;
+  }
+  .art-modal-col--bio {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding: 24px 20px;
+  }
+  .art-modal-col--work {
+    padding: 24px 20px;
+  }
+  .art-modal-portrait-wrap {
+    height: 240px;
+  }
+  .art-modal-work-frame {
+    height: 260px;
+  }
+  .art-modal-topbar {
+    padding: 12px 16px;
   }
 }
 

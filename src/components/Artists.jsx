@@ -1,11 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ARTISTS } from '../data/content';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+
+const getArtistNameParts = (fullName) => {
+  if (fullName === 'Alicia Díaz Rinaldi') {
+    return { first: 'ALICIA', last: 'DÍAZ RINALDI' };
+  }
+  const parts = fullName.trim().split(' ');
+  if (parts.length === 1) return { first: '', last: parts[0].toUpperCase() };
+  const first = parts.slice(0, -1).join(' ').toUpperCase();
+  const last = parts[parts.length - 1].toUpperCase();
+  return { first, last };
+};
 
 export default function Artists() {
   const [activeArtistIndex, setActiveArtistIndex] = useState(null);
   const [activeWorkIndex, setActiveWorkIndex] = useState(0);
   const openerRef = useRef(null);
-  const panelRef = useRef(null);
+  const modalPanelRef = useRef(null);
 
   const activeArtist = activeArtistIndex !== null ? ARTISTS[activeArtistIndex] : null;
   const works = activeArtist
@@ -30,7 +42,17 @@ export default function Artists() {
     }
   };
 
-  const handleStep = (dir) => {
+  const handlePrevArtist = () => {
+    setActiveArtistIndex((prev) => (prev > 0 ? prev - 1 : ARTISTS.length - 1));
+    setActiveWorkIndex(0);
+  };
+
+  const handleNextArtist = () => {
+    setActiveArtistIndex((prev) => (prev < ARTISTS.length - 1 ? prev + 1 : 0));
+    setActiveWorkIndex(0);
+  };
+
+  const handleWorkStep = (dir) => {
     if (!works.length) return;
     const n = works.length;
     setActiveWorkIndex((prev) => (prev + dir + n) % n);
@@ -39,44 +61,41 @@ export default function Artists() {
   useEffect(() => {
     if (activeArtistIndex === null) return;
 
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    panelRef.current?.focus();
+    modalPanelRef.current?.focus();
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         handleClose();
-      } else if (e.key === 'ArrowLeft' && hasMultipleWorks) {
-        handleStep(-1);
-      } else if (e.key === 'ArrowRight' && hasMultipleWorks) {
-        handleStep(1);
-      } else if (e.key === 'Tab' && panelRef.current) {
-        const buttons = Array.from(
-          panelRef.current.querySelectorAll('button:not([hidden])')
-        );
-        if (buttons.length === 0) return;
-        const first = buttons[0];
-        const last = buttons[buttons.length - 1];
-
-        if (e.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
+      } else if (e.key === 'ArrowLeft') {
+        if (hasMultipleWorks && e.altKey) {
+          handleWorkStep(-1);
+        } else {
+          handlePrevArtist();
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (hasMultipleWorks && e.altKey) {
+          handleWorkStep(1);
+        } else {
+          handleNextArtist();
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [activeArtistIndex, hasMultipleWorks, works.length]);
 
+  // Duplicamos la lista para crear un bucle infinito continuo y suave (Marquee)
+  const displayArtists = [...ARTISTS, ...ARTISTS];
+
   return (
     <>
-      {/* ===== INICIO SECCIÓN ARTISTAS ===== */}
+      {/* ===== SECCIÓN ARTISTAS CON SCROLL AUTOMÁTICO INFINITO ===== */}
       <section className="artistas" id="artistas">
         <div className="artistas__inner">
           <div className="artistas__eyebrow">
@@ -85,131 +104,212 @@ export default function Artists() {
           <h2 className="artistas__title">
             Artistas de la <em>colección</em>
           </h2>
-          <div className="artistas__list" id="artistas-list">
-            {ARTISTS.map((a, i) => {
-              const artistWorks =
-                a.works && a.works.length > 0 ? a.works : [a.artwork];
-              const primaryWork = artistWorks[0];
+          <p className="artistas__intro">
+            Grandes maestros y creadores contemporáneos que forman parte de nuestro acervo y subastas.
+            Pasá el mouse sobre cualquier artista para pausar y ver su obra, o hacé clic para abrir su ficha completa.
+          </p>
+        </div>
+
+        {/* Carrusel Marquee infinito (se desplaza solo de forma continua y se pausa al hacer hover) */}
+        <div className="art-marquee-container">
+          <div className="art-marquee-track">
+            {displayArtists.map((artist, i) => {
+              const originalIndex = i % ARTISTS.length;
+              const { first, last } = getArtistNameParts(artist.name);
+              const primaryWork =
+                artist.works && artist.works.length > 0
+                  ? artist.works[0]
+                  : artist.artwork;
+              const artworkImg = primaryWork?.img || primaryWork?.src;
 
               return (
-                <article className="art-row" key={a.id || a.name}>
-                  <div className="art-row__media">
-                    {a.portrait ? (
-                      <img
-                        src={a.portrait}
-                        alt={`Retrato de ${a.name}`}
-                        style={{ objectPosition: a.portraitPosition || 'center top' }}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="ph">[RETRATO]</div>
-                    )}
+                <div
+                  key={`${artist.id || artist.name}-${i}`}
+                  className="art-card-wrapper"
+                  onClick={(e) => handleOpen(originalIndex, e.currentTarget)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleOpen(originalIndex, e.currentTarget);
+                    }
+                  }}
+                  aria-label={`Ver biografía y obras de ${artist.name}`}
+                >
+                  {/* Tarjeta rectangular */}
+                  <div className="art-box">
+                    {/* Estado 1 (Default): Fondo oscuro elegante con nombre */}
+                    <div className="art-box__front">
+                      <div className="art-box__text">
+                        {first && <span className="art-box__first">{first}</span>}
+                        <span className="art-box__last">{last}</span>
+                      </div>
+                    </div>
+
+                    {/* Estado 2 (Hover): Ficha catálogo clara con la obra */}
+                    <div className="art-box__back">
+                      <span className="art-box__watermark">OBRAS DE SU AUTORÍA</span>
+                      <div className="art-box__artwork-wrap">
+                        {artworkImg ? (
+                          <img
+                            src={artworkImg}
+                            alt={`${primaryWork?.title || artist.name}`}
+                            className="art-box__artwork-img"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="art-box__artwork-ph">[OBRA]</div>
+                        )}
+                      </div>
+                      <div className="art-box__preview-caption">
+                        <span className="art-box__preview-title">
+                          {primaryWork?.title || artist.name}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="art-row__text">
-                    <h3 className="art-row__name">{a.name}</h3>
-                    <p className="art-row__meta">
-                      {a.years} · {a.discipline}
-                    </p>
-                    <p className="art-row__bio">{a.bio}</p>
-                    {primaryWork && (
-                      <p className="art-row__work">
-                        Obra destacada · {primaryWork.title}
-                        {primaryWork.technique ? ` (${primaryWork.technique})` : ''}
-                      </p>
-                    )}
-                    <button
-                      type="button"
-                      className="btn"
-                      data-artist={i}
-                      onClick={(e) => handleOpen(i, e.currentTarget)}
-                    >
-                      VER OBRA →
-                    </button>
+
+                  {/* Texto debajo de la tarjeta */}
+                  <div className="art-card-caption">
+                    Colección {artist.name}
                   </div>
-                </article>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* Visor de la obra */}
-      <div
-        className="vo"
-        id="vo"
-        hidden={activeArtistIndex === null}
-        onClick={(e) => {
-          if (!e.target.closest('img, .ph, button, .vo__cap')) {
-            handleClose();
-          }
-        }}
-      >
+      {/* ===== MODAL / PANTALLITA DE DETALLE DEL ARTISTA ===== */}
+      {activeArtist && (
         <div
-          ref={panelRef}
-          className="vo__panel"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="vo-title"
-          aria-label={activeArtist ? `Obra de ${activeArtist.name}` : undefined}
-          tabIndex={-1}
+          className="art-modal-overlay"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleClose();
+            }
+          }}
         >
-          <button
-            type="button"
-            className="vo__close"
-            id="vo-close"
-            onClick={handleClose}
+          <div
+            ref={modalPanelRef}
+            className="art-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="art-modal-title"
+            tabIndex={-1}
           >
-            CERRAR ×
-          </button>
-          <div className="vo__stage">
-            <button
-              type="button"
-              className="vo__nav"
-              id="vo-prev"
-              aria-label="Obra anterior"
-              hidden={!hasMultipleWorks}
-              onClick={() => handleStep(-1)}
-            >
-              ←
-            </button>
-            <figure className="vo__fig" id="vo-fig">
-              {currentWork && (currentWork.img || currentWork.src) ? (
-                <img
-                  src={currentWork.img || currentWork.src}
-                  alt={`${currentWork.title}${
-                    currentWork.technique ? `, ${currentWork.technique}` : ''
-                  }, de ${activeArtist?.name || ''}`}
-                />
-              ) : (
-                <div className="ph">[OBRA]</div>
-              )}
-            </figure>
-            <button
-              type="button"
-              className="vo__nav"
-              id="vo-next"
-              aria-label="Obra siguiente"
-              hidden={!hasMultipleWorks}
-              onClick={() => handleStep(1)}
-            >
-              →
-            </button>
-          </div>
-          <div className="vo__cap">
-            <div>
-              <h3 className="vo__title" id="vo-title">
-                {currentWork?.title || ''}
-              </h3>
-              <p className="vo__sub" id="vo-sub">
-                {currentWork && currentWork.technique && activeArtist
-                  ? `${currentWork.technique} · ${activeArtist.name}`
-                  : activeArtist?.name || ''}
-              </p>
+            {/* Barra superior de controles */}
+            <div className="art-modal-topbar">
+              <div className="art-modal-topbar__eyebrow">
+                <span>COLECCIÓN INSIGNIA</span>
+              </div>
+
+              {/* Botón Cerrar */}
+              <button
+                type="button"
+                className="art-modal-close-btn"
+                onClick={handleClose}
+                aria-label="Cerrar ventana de artista"
+              >
+                <span>CERRAR</span>
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Contenido en 2 columnas: Artista & Obra */}
+            <div className="art-modal-body">
+              {/* Columna Izquierda: Información y foto del Artista */}
+              <div className="art-modal-col art-modal-col--bio">
+                <div className="art-modal-portrait-wrap">
+                  {activeArtist.portrait ? (
+                    <img
+                      src={activeArtist.portrait}
+                      alt={`Retrato de ${activeArtist.name}`}
+                      className="art-modal-portrait"
+                      style={{ objectPosition: activeArtist.portraitPosition || 'center top' }}
+                    />
+                  ) : (
+                    <div className="art-modal-ph">[RETRATO]</div>
+                  )}
+                </div>
+
+                <div className="art-modal-info">
+                  <h3 id="art-modal-title" className="art-modal-name">
+                    {activeArtist.name}
+                  </h3>
+                  <p className="art-modal-meta">
+                    {activeArtist.years} · {activeArtist.discipline}
+                  </p>
+                  <p className="art-modal-bio-text">{activeArtist.bio}</p>
+                </div>
+              </div>
+
+              {/* Columna Derecha: Obra Destacada de la Colección */}
+              <div className="art-modal-col art-modal-col--work">
+                <div className="art-modal-work-badge">
+                  <span>OBRA DESTACADA EN SALA</span>
+                  {hasMultipleWorks && (
+                    <span className="art-modal-work-count">
+                      {activeWorkIndex + 1} de {works.length}
+                    </span>
+                  )}
+                </div>
+
+                <div className="art-modal-work-frame">
+                  {currentWork && (currentWork.img || currentWork.src) ? (
+                    <img
+                      src={currentWork.img || currentWork.src}
+                      alt={`${currentWork.title}${
+                        currentWork.technique ? `, ${currentWork.technique}` : ''
+                      }`}
+                      className="art-modal-work-img"
+                    />
+                  ) : (
+                    <div className="art-modal-ph">[OBRA]</div>
+                  )}
+
+                  {hasMultipleWorks && (
+                    <div className="art-modal-work-nav">
+                      <button
+                        type="button"
+                        onClick={() => handleWorkStep(-1)}
+                        className="art-modal-work-arrow"
+                        aria-label="Obra anterior"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleWorkStep(1)}
+                        className="art-modal-work-arrow"
+                        aria-label="Obra siguiente"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="art-modal-work-details">
+                  <h4 className="art-modal-work-title">
+                    {currentWork?.title || 'Obra destacada'}
+                  </h4>
+                  {currentWork?.technique && (
+                    <p className="art-modal-work-technique">
+                      {currentWork.technique}
+                    </p>
+                  )}
+                  {currentWork?.desc && (
+                    <p className="art-modal-work-desc">{currentWork.desc}</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {/* ===== FIN SECCIÓN ARTISTAS ===== */}
+      )}
     </>
   );
 }
