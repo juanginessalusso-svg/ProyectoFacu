@@ -22,7 +22,9 @@ export default {
       },
       fontFamily: {
         display: ['Cormorant Garamond', 'Georgia', 'serif'],
-        sans: ['Montserrat', 'system-ui', 'sans-serif']
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
+        subastas: ['"Copperplate Gothic 29 BC"', '"Copperplate Gothic Bold"', '"Copperplate Gothic"', 'Copperplate', 'serif'],
+        insignia: ['Donau', '"Donau Neue"', '"Donau Uppercase Neue"', '"Donau Alte"', '"Donau-Regular"', '"Cormorant Garamond"', 'Georgia', 'serif'],
       }
     },
   },

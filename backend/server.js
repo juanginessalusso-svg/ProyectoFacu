@@ -68,14 +68,26 @@ db.exec(`
     amount REAL,
     created_at TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS accreditations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    dni TEXT,
+    email TEXT,
+    phone TEXT,
+    auction_deadline TEXT,
+    created_at TEXT
+  );
 `);
 
-// Migración retrocompatible si la tabla bids ya existía sin la columna dni
+// Migración retrocompatible si la tabla bids o accreditations ya existían sin nuevas columnas
 try {
   db.exec('ALTER TABLE bids ADD COLUMN dni TEXT;');
-} catch (_) {
-  // La columna ya existía, no es necesario hacer nada
-}
+} catch (_) {}
+
+try {
+  db.exec('ALTER TABLE accreditations ADD COLUMN auction_deadline TEXT;');
+} catch (_) {}
 
 // Semilla inicial si la base de datos es nueva
 function initSeed() {
@@ -88,7 +100,7 @@ function initSeed() {
 
   const lotsCount = db.prepare('SELECT COUNT(*) as count FROM lots').get().count;
   if (lotsCount === 0) {
-    console.log('[DB] Inicializando catálogo oficial con 24 lotes...');
+    console.log('[DB] Inicializando catálogo oficial con 23 lotes...');
     try {
       const defaults = JSON.parse(fs.readFileSync(path.join(__dirname, 'defaults.json'), 'utf-8'));
       
@@ -114,6 +126,7 @@ initSeed();
 // -------------------------------------------------------------
 // CABECERAS DE SEGURIDAD Y MIDDLEWARES
 // -------------------------------------------------------------
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
 
 // Cabeceras HTTP de protección
@@ -189,6 +202,11 @@ function requireAuth(req, res, next) {
 // -------------------------------------------------------------
 const loginAttempts = new Map();
 const bidAttempts = new Map();
+const accreditationAttempts = new Map();
+
+function getClientIp(req) {
+  return req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.connection?.remoteAddress || '127.0.0.1';
+}
 
 // Helper para limpiar periódicamente mapas de memoria cada 30 minutos
 setInterval(() => {
@@ -199,13 +217,16 @@ setInterval(() => {
   for (const [key, val] of bidAttempts.entries()) {
     if (now - val.firstAttempt > 60000) bidAttempts.delete(key);
   }
+  for (const [key, val] of accreditationAttempts.entries()) {
+    if (now - val.firstAttempt > 60000) accreditationAttempts.delete(key);
+  }
 }, 30 * 60 * 1000);
 
 // -------------------------------------------------------------
 // RUTAS DE AUTENTICACIÓN
 // -------------------------------------------------------------
 app.post('/api/auth/login', (req, res) => {
-  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection.remoteAddress;
+  const ip = getClientIp(req);
   const now = Date.now();
   const attempt = loginAttempts.get(ip) || { count: 0, lockUntil: 0, lastAttempt: now };
   attempt.lastAttempt = now;
@@ -417,7 +438,7 @@ app.post('/api/upload', requireAuth, upload.single('image'), (req, res) => {
 
 // Registrar Preoferta en tiempo real (Público con protección anti-spam)
 app.post('/api/bids', (req, res) => {
-  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection.remoteAddress;
+  const ip = getClientIp(req);
   const now = Date.now();
   const bidInfo = bidAttempts.get(ip) || { count: 0, firstAttempt: now };
 
@@ -467,10 +488,12 @@ app.post('/api/bids', (req, res) => {
 
     const lot = JSON.parse(lotRow.data);
     const currentPrice = lot.currentPrice || lot.priceValue || 0;
+    const BID_INCREMENT = 50; // Escalón de puja de a $USD 50
+    const minRequired = currentPrice + BID_INCREMENT;
 
-    if (amountNum <= currentPrice) {
+    if (amountNum < minRequired) {
       return res.status(400).json({
-        error: `La preoferta debe ser estrictamente superior al valor actual de $USD ${currentPrice.toLocaleString('es-AR')}`
+        error: `La preoferta mínima requerida es de $USD ${minRequired.toLocaleString('es-AR')} (las posturas aumentan en escalones de $USD 50).`
       });
     }
 
@@ -538,6 +561,172 @@ app.get('/api/bids', requireAuth, (req, res) => {
     res.json({ bids });
   } catch (err) {
     res.status(500).json({ error: 'Error al consultar ofertas' });
+  }
+});
+
+// Registrar acreditación de visitante para el catálogo de subastas
+app.post('/api/accreditations', (req, res) => {
+  const ip = getClientIp(req);
+  const now = Date.now();
+  const accInfo = accreditationAttempts.get(ip) || { count: 0, firstAttempt: now };
+
+  if (now - accInfo.firstAttempt > 60000) {
+    accInfo.count = 1;
+    accInfo.firstAttempt = now;
+  } else {
+    accInfo.count += 1;
+    if (accInfo.count > 10) {
+      return res.status(429).json({
+        error: 'Demasiadas solicitudes de acreditación. Por favor espera un minuto antes de reintentar.'
+      });
+    }
+  }
+  accreditationAttempts.set(ip, accInfo);
+
+  try {
+    const { name, dni, email, phone, auctionDeadline } = req.body;
+    if (!name || !dni || !email || !phone) {
+      return res.status(400).json({ error: 'Nombre, DNI, correo electrónico y teléfono son obligatorios' });
+    }
+    const safeName = String(name).trim().slice(0, 100);
+    const safeDni = String(dni).trim().slice(0, 30);
+    const safeEmail = String(email).trim().slice(0, 120);
+    const safePhone = String(phone).trim().slice(0, 50);
+    const safeAuctionDeadline = auctionDeadline ? String(auctionDeadline).trim().slice(0, 50) : null;
+
+    if (!safeName || !safeDni || !safeEmail || !safePhone) {
+      return res.status(400).json({ error: 'Todos los campos de acreditación son obligatorios' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(safeEmail)) {
+      return res.status(400).json({ error: 'El correo electrónico ingresado no tiene un formato válido' });
+    }
+
+    const createdAt = new Date().toISOString();
+
+    db.prepare(`
+      INSERT INTO accreditations (name, dni, email, phone, auction_deadline, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(safeName, safeDni, safeEmail, safePhone, safeAuctionDeadline, createdAt);
+
+    res.json({ success: true, message: 'Acreditación registrada exitosamente' });
+  } catch (err) {
+    console.error('Error al registrar acreditación:', err);
+    res.status(500).json({ error: 'Error al registrar acreditación' });
+  }
+});
+
+// Ver lista de acreditaciones enriquecida con las pujas del usuario (Protegido para el Admin)
+app.get('/api/accreditations', requireAuth, (req, res) => {
+  try {
+    const accreditations = db.prepare('SELECT * FROM accreditations ORDER BY id DESC').all();
+    const allBids = db.prepare('SELECT * FROM bids ORDER BY id DESC').all();
+    const lotsRows = db.prepare('SELECT id, data FROM lots').all();
+    const lotsMap = {};
+    for (const r of lotsRows) {
+      try {
+        lotsMap[r.id] = JSON.parse(r.data);
+      } catch {}
+    }
+
+    const enhanced = accreditations.map((acc) => {
+      const cleanAccDni = String(acc.dni || '').trim().toLowerCase();
+      const cleanAccEmail = String(acc.email || '').trim().toLowerCase();
+
+      // Buscar pujas del usuario por DNI o Email
+      const userBids = allBids.filter((b) => {
+        const bDni = String(b.dni || '').trim().toLowerCase();
+        const bEmail = String(b.email || '').trim().toLowerCase();
+        return (cleanAccDni && bDni === cleanAccDni) || (cleanAccEmail && bEmail === cleanAccEmail);
+      });
+
+      // Agrupar por lote para mostrar la postura más alta por obra
+      const lotBidsMap = new Map();
+      for (const b of userBids) {
+        const current = lotBidsMap.get(b.lot_id);
+        if (!current || b.amount > current.amount) {
+          lotBidsMap.set(b.lot_id, b);
+        }
+      }
+
+      const bidsList = Array.from(lotBidsMap.values()).map((b) => {
+        const lotInfo = lotsMap[b.lot_id] || {};
+        return {
+          lotId: b.lot_id,
+          lotNumber: lotInfo.lote || `Lote #${String(b.lot_id).padStart(2, '0')}`,
+          title: lotInfo.title || 'Obra en subasta',
+          artist: lotInfo.artist || '',
+          amount: b.amount,
+          date: b.created_at,
+        };
+      });
+
+      return {
+        ...acc,
+        bids: bidsList,
+      };
+    });
+
+    res.json({ accreditations: enhanced });
+  } catch (err) {
+    console.error('Error al consultar acreditaciones:', err);
+    res.status(500).json({ error: 'Error al consultar acreditaciones' });
+  }
+});
+
+// Eliminar una acreditación específica (Protegido para el Admin)
+app.delete('/api/accreditations/:id', requireAuth, (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'ID de acreditación inválido' });
+    }
+    const info = db.prepare('DELETE FROM accreditations WHERE id = ?').run(id);
+    if (info.changes === 0) {
+      return res.status(404).json({ error: 'Acreditación no encontrada' });
+    }
+    res.json({ success: true, message: 'Acreditación eliminada exitosamente' });
+  } catch (err) {
+    console.error('Error al eliminar acreditación:', err);
+    res.status(500).json({ error: 'Error al eliminar acreditación' });
+  }
+});
+
+// Reiniciar todas las acreditaciones para una nueva subasta (Protegido para el Admin)
+app.post('/api/accreditations/reset', requireAuth, (req, res) => {
+  try {
+    db.prepare('DELETE FROM accreditations').run();
+    db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run(
+      'accreditations_reset_at',
+      new Date().toISOString()
+    );
+    res.json({
+      success: true,
+      message: 'Todas las acreditaciones han sido reiniciadas. Los visitantes deberán acreditarse nuevamente.',
+    });
+  } catch (err) {
+    console.error('Error al reiniciar acreditaciones:', err);
+    res.status(500).json({ error: 'Error al reiniciar acreditaciones' });
+  }
+});
+
+// Verificar si una acreditación sigue activa en la base de datos (Público)
+app.get('/api/accreditations/check', (req, res) => {
+  try {
+    const { dni, email } = req.query;
+    if (!dni && !email) {
+      return res.json({ valid: false });
+    }
+    const row = db.prepare(`
+      SELECT id FROM accreditations 
+      WHERE (dni = ? AND dni != '') OR (email = ? AND email != '')
+      LIMIT 1
+    `).get(String(dni || '').trim(), String(email || '').trim());
+
+    res.json({ valid: Boolean(row) });
+  } catch (err) {
+    res.json({ valid: true });
   }
 });
 

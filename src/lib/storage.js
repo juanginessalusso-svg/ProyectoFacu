@@ -489,6 +489,82 @@ export async function apiGetBids() {
   }
 }
 
+// Registrar acreditación de visitante para el catálogo de subastas
+export async function apiRegisterAccreditation({ name, dni, email, phone, auctionDeadline }) {
+  try {
+    const res = await fetch(`${API_BASE}/accreditations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, dni, email, phone, auctionDeadline }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || 'Error al registrar acreditación' };
+    }
+    return { success: true };
+  } catch (err) {
+    console.warn('[Accreditation] Backend fuera de línea para acreditación:', err.message);
+    return { success: false, isOffline: true };
+  }
+}
+
+// Obtener todas las acreditaciones para el Administrador
+export async function apiGetAccreditations() {
+  try {
+    const res = await fetch(`${API_BASE}/accreditations`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data.accreditations) ? data.accreditations : [];
+  } catch (err) {
+    console.warn('[Accreditations] Error consultando acreditaciones:', err);
+    return [];
+  }
+}
+
+// Eliminar una acreditación específica (Administrador)
+export async function apiDeleteAccreditation(id) {
+  try {
+    const res = await fetch(`${API_BASE}/accreditations/${id}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeader() },
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('[Accreditations] Error al eliminar acreditación:', err);
+    return false;
+  }
+}
+
+// Reiniciar todas las acreditaciones para una nueva subasta (Administrador)
+export async function apiResetAllAccreditations() {
+  try {
+    const res = await fetch(`${API_BASE}/accreditations/reset`, {
+      method: 'POST',
+      headers: { ...getAuthHeader() },
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('[Accreditations] Error al reiniciar acreditaciones:', err);
+    return false;
+  }
+}
+
+// Verificar si una acreditación sigue existiendo en el servidor (Público)
+export async function apiCheckAccreditation({ dni, email }) {
+  try {
+    const params = new URLSearchParams();
+    if (dni) params.append('dni', dni);
+    if (email) params.append('email', email);
+    const res = await fetch(`${API_BASE}/accreditations/check?${params.toString()}`);
+    if (!res.ok) return { valid: true };
+    return await res.json();
+  } catch {
+    return { valid: true };
+  }
+}
+
 // Login en el backend
 export async function apiLogin(passwordOrPin) {
   const localPin = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.PIN) : null;

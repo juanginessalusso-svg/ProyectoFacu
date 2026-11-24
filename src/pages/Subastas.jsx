@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Clock,
   ShieldCheck,
@@ -11,8 +12,16 @@ import {
   Filter,
   Mail,
   Send,
+  Lock,
 } from 'lucide-react';
-import { getLots, getDeadline, formatDeadlineText, apiSubmitBid } from '../lib/storage';
+import {
+  getLots,
+  getDeadline,
+  formatDeadlineText,
+  apiSubmitBid,
+  apiRegisterAccreditation,
+  apiCheckAccreditation,
+} from '../lib/storage';
 import Modal from '../components/Modal';
 import Lightbox from '../components/Lightbox';
 import PreofertaStepper from '../components/PreofertaStepper';
@@ -39,6 +48,8 @@ function calculateDeadlineTimeLeft(deadlineStr) {
 }
 
 export default function Subastas() {
+  const navigate = useNavigate();
+
   const [lots, setLots] = useState(() => getLots());
   const [deadline, setDeadline] = useState(() => getDeadline());
   const [timeLeft, setTimeLeft] = useState(() => calculateDeadlineTimeLeft(getDeadline()));
@@ -48,6 +59,59 @@ export default function Subastas() {
   const [submittedData, setSubmittedData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArtist, setSelectedArtist] = useState('');
+
+  // Acreditación de usuario para acceder al catálogo de subastas (vinculada al plazo / edición de la subasta)
+  const [accreditedUser, setAccreditedUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('insignia_accredited_user');
+      if (!saved) return null;
+      const u = JSON.parse(saved);
+      const currentDl = getDeadline();
+      // Si la subasta cambió de fecha / edición, la acreditación anterior expira
+      if (u.auctionDeadline && currentDl && u.auctionDeadline !== currentDl) {
+        return null;
+      }
+      return u;
+    } catch {
+      return null;
+    }
+  });
+
+  const [showGateModal, setShowGateModal] = useState(() => {
+    try {
+      const saved = localStorage.getItem('insignia_accredited_user');
+      if (!saved) return true;
+      const u = JSON.parse(saved);
+      const currentDl = getDeadline();
+      if (u.auctionDeadline && currentDl && u.auctionDeadline !== currentDl) {
+        return true;
+      }
+      return false;
+    } catch {
+      return true;
+    }
+  });
+
+  const [accreditationForm, setAccreditationForm] = useState(() => {
+    try {
+      // Priorizar el perfil guardado para pre-completar los datos si es una nueva subasta
+      const saved =
+        localStorage.getItem('insignia_saved_profile') ||
+        localStorage.getItem('insignia_accredited_user');
+      if (saved) {
+        const u = JSON.parse(saved);
+        return {
+          name: u.name || '',
+          dni: u.dni || '',
+          email: u.email || '',
+          phone: u.phone || '',
+        };
+      }
+    } catch {}
+    return { name: '', dni: '', email: '', phone: '' };
+  });
+
+  const [accreditationError, setAccreditationError] = useState('');
 
   // Registro de últimas preofertas por cada lote (persistidas en localStorage)
   const [preoffersByLot, setPreoffersByLot] = useState(() => {
@@ -60,12 +124,28 @@ export default function Subastas() {
   });
 
   // Formulario de preoferta con datos completos de verificación
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    dni: '',
-    phone: '',
-    bid: '',
+  const [formData, setFormData] = useState(() => {
+    try {
+      const saved =
+        localStorage.getItem('insignia_saved_profile') ||
+        localStorage.getItem('insignia_accredited_user');
+      const u = saved ? JSON.parse(saved) : null;
+      return {
+        name: u?.name || '',
+        email: u?.email || '',
+        dni: u?.dni || '',
+        phone: u?.phone || '',
+        bid: '',
+      };
+    } catch {
+      return {
+        name: '',
+        email: '',
+        dni: '',
+        phone: '',
+        bid: '',
+      };
+    }
   });
 
   useEffect(() => {
@@ -76,6 +156,19 @@ export default function Subastas() {
       const currentDl = getDeadline();
       setDeadline(currentDl);
       setTimeLeft(calculateDeadlineTimeLeft(currentDl));
+
+      // Si cambió el plazo de la subasta, exigir nueva acreditación
+      try {
+        const saved = localStorage.getItem('insignia_accredited_user');
+        if (saved) {
+          const u = JSON.parse(saved);
+          if (u.auctionDeadline && currentDl && u.auctionDeadline !== currentDl) {
+            setAccreditedUser(null);
+            setShowGateModal(true);
+          }
+        }
+      } catch {}
+
       try {
         const saved = localStorage.getItem('insignia_preoffers_v1');
         if (saved) setPreoffersByLot(JSON.parse(saved));
@@ -93,6 +186,19 @@ export default function Subastas() {
       clearInterval(timer);
     };
   }, []);
+
+  // Verificar en el servidor si la acreditación fue eliminada por el administrador
+  useEffect(() => {
+    if (accreditedUser && (accreditedUser.dni || accreditedUser.email)) {
+      apiCheckAccreditation({ dni: accreditedUser.dni, email: accreditedUser.email }).then((res) => {
+        if (res && res.valid === false) {
+          localStorage.removeItem('insignia_accredited_user');
+          setAccreditedUser(null);
+          setShowGateModal(true);
+        }
+      });
+    }
+  }, [accreditedUser?.dni, accreditedUser?.email]);
 
   // Slides para el Lightbox
   const lightboxSlides = useMemo(() => {
@@ -125,19 +231,79 @@ export default function Subastas() {
     });
   }, [lots, searchQuery, selectedArtist]);
 
+  // Procesar y registrar acreditación de usuario para ingresar al catálogo
+  const handleAccreditationSubmit = (e) => {
+    e.preventDefault();
+    setAccreditationError('');
+
+    const cleanName = (accreditationForm.name || '').trim();
+    const cleanDni = (accreditationForm.dni || '').trim();
+    const cleanEmail = (accreditationForm.email || '').trim();
+    const cleanPhone = (accreditationForm.phone || '').trim();
+
+    if (!cleanName || !cleanDni || !cleanEmail || !cleanPhone) {
+      setAccreditationError('Todos los campos son obligatorios para ingresar.');
+      return;
+    }
+
+    const userData = {
+      name: cleanName,
+      dni: cleanDni,
+      email: cleanEmail,
+      phone: cleanPhone,
+      auctionDeadline: deadline,
+    };
+
+    try {
+      localStorage.setItem('insignia_accredited_user', JSON.stringify(userData));
+      localStorage.setItem(
+        'insignia_saved_profile',
+        JSON.stringify({
+          name: cleanName,
+          dni: cleanDni,
+          email: cleanEmail,
+          phone: cleanPhone,
+        })
+      );
+    } catch (err) {
+      console.warn('LocalStorage error:', err);
+    }
+
+    setAccreditedUser(userData);
+    setShowGateModal(false);
+
+    // Auto-completar los datos personales para la preoferta
+    setFormData((prev) => ({
+      ...prev,
+      name: userData.name,
+      dni: userData.dni,
+      email: userData.email,
+      phone: userData.phone,
+    }));
+
+    // Registrar en base de datos SQLite de forma transparente vinculando a la subasta
+    apiRegisterAccreditation({ ...userData, auctionDeadline: deadline }).catch((err) => {
+      console.warn('[Acreditación] Error registrando en backend:', err);
+    });
+  };
+
   // Abrir modal de preoferta (el campo de puja inicia vacío o superador)
   const handleOpenPreoffer = useCallback((lot) => {
+    if (!accreditedUser) {
+      setShowGateModal(true);
+      return;
+    }
     setActivePreofferLot(lot);
     setPreofferSubmitted(false);
     setSubmittedData(null);
     setFormData({
-      name: '',
-      email: '',
-      dni: '',
-      phone: '',
+      name: accreditedUser.name || '',
+      email: accreditedUser.email || '',
+      dni: accreditedUser.dni || '',
+      phone: accreditedUser.phone || '',
       bid: '',
     });
-  }, []);
+  }, [accreditedUser]);
 
   const handleClosePreoffer = useCallback(() => {
     setActivePreofferLot(null);
@@ -152,12 +318,14 @@ export default function Subastas() {
 
     const currentHighest = preoffersByLot[activePreofferLot.id]?.highestBid;
     const currentThreshold = currentHighest || activePreofferLot.priceValue;
+    const BID_INCREMENT = 50; // Escalón de puja de $USD 50
+    const minAllowedBid = currentThreshold + BID_INCREMENT;
     const bidNum = parseFloat(formData.bid);
 
-    // Validación estricta: NO se permite ofertar el monto inicial ni un valor menor o igual
-    if (!bidNum || bidNum <= currentThreshold) {
+    // Validación estricta: debe superar la base o última puja en al menos el escalón de $50 USD
+    if (!bidNum || bidNum < minAllowedBid) {
       alert(
-        `El monto de la preoferta debe ser estrictamente mayor a $USD ${currentThreshold.toLocaleString()}.`
+        `El monto de la preoferta debe ser de al menos $USD ${minAllowedBid.toLocaleString()} (las posturas aumentan de a $USD 50).`
       );
       return;
     }
@@ -348,6 +516,49 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
 
           {/* CATÁLOGO DE LOTES DISPONIBLES · MODELO 3 EDITORIAL VERDE */}
           <div id="catalogo" className="mt-12">
+            {accreditedUser && (
+              <div className="mb-8 p-3.5 bg-[#3e3e37]/80 border border-[var(--gold)]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 text-[var(--ivory)]">
+                  <div className="w-7 h-7 rounded-full bg-[var(--gold)]/20 border border-[var(--gold)]/50 flex items-center justify-center text-[var(--gold-hi)] shrink-0">
+                    <ShieldCheck size={16} />
+                  </div>
+                  <div>
+                    <span className="text-[var(--gold-hi)] font-mono uppercase tracking-wider text-[10px] block">
+                      Acreditación Verificada
+                    </span>
+                    <span className="font-medium text-[var(--ivory)]">
+                      {accreditedUser.name}
+                    </span>
+                    <span className="text-[var(--ivory-dim)] ml-2">
+                      · DNI: {accreditedUser.dni}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowGateModal(true)}
+                    className="text-[11px] font-mono uppercase tracking-wider text-[var(--gold-hi)] hover:underline"
+                  >
+                    Modificar mis datos
+                  </button>
+                  <span className="text-[var(--line)]">|</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem('insignia_accredited_user');
+                      setAccreditedUser(null);
+                      setShowGateModal(true);
+                    }}
+                    className="text-[11px] font-mono uppercase tracking-wider text-red-400 hover:text-red-300 hover:underline"
+                    title="Cerrar acreditación y volver a solicitar datos"
+                  >
+                    Desvincular
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 my-8">
               <div>
                 <p className="eyebrow">Catálogo Oficial</p>
@@ -394,8 +605,36 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
               </div>
             </div>
 
-            {/* GRILLA DE LOTES MODELO 3 */}
-            {filteredLots.length === 0 ? (
+            {/* GRILLA DE LOTES MODELO 3 (PROTEGIDA POR ACREDITACIÓN) */}
+            {!accreditedUser ? (
+              <div className="p-10 md:p-14 text-center border border-[var(--gold)]/30 bg-[#3e3e37]/90 max-w-2xl mx-auto my-8">
+                <div className="w-16 h-16 rounded-full bg-[var(--gold)]/10 border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold)] mx-auto mb-5">
+                  <Lock size={28} />
+                </div>
+                <h3 className="font-serif text-2xl md:text-3xl text-[var(--ivory)] font-medium mb-3">
+                  Catálogo Oficial de Subastas
+                </h3>
+                <p className="text-sm text-[var(--ivory-dim)] max-w-md mx-auto leading-relaxed mb-6">
+                  Para ingresar y consultar las 23 obras disponibles, sus bases y participar en las preofertas de la colección inaugural, completá tu acreditación obligatoria.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowGateModal(true)}
+                    className="btn-gold !py-3 !px-8 text-xs uppercase tracking-wider font-semibold w-full sm:w-auto"
+                  >
+                    Completar Acreditación e Ingresar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    className="btn-ghost !py-3 !px-6 text-xs uppercase tracking-wider w-full sm:w-auto"
+                  >
+                    ← Volver al inicio
+                  </button>
+                </div>
+              </div>
+            ) : filteredLots.length === 0 ? (
               <div className="p-12 text-center border border-[var(--line)] bg-[#4a4a42] my-8">
                 <p className="text-[var(--ivory-dim)] text-sm mb-3">
                   No se encontraron obras o artistas para los filtros seleccionados.
@@ -513,9 +752,10 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
       {activePreofferLot && (() => {
         const currentHighest = preoffersByLot[activePreofferLot.id]?.highestBid;
         const currentThreshold = currentHighest || activePreofferLot.priceValue;
-        const minAllowedBid = currentThreshold + 1;
+        const BID_INCREMENT = 50; // Escalón de puja de $USD 50
+        const minAllowedBid = currentThreshold + BID_INCREMENT;
         const enteredBid = parseFloat(formData.bid) || 0;
-        const isBidValid = enteredBid > currentThreshold;
+        const isBidValid = enteredBid >= minAllowedBid;
 
         return (
           <Modal
@@ -625,7 +865,7 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                         Monto de tu preoferta ($USD) *
                       </label>
                       <span className="text-[11px] font-mono text-[var(--gold-hi)] font-semibold">
-                        Mínimo requerido: $USD {minAllowedBid.toLocaleString()}
+                        Mínimo requerido: $USD {minAllowedBid.toLocaleString()} (escalón de a $50)
                       </span>
                     </div>
 
@@ -635,21 +875,43 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                       </span>
                       <input
                         type="number"
+                        step={50}
                         required
                         min={minAllowedBid}
                         value={formData.bid}
                         onChange={(e) => setFormData({ ...formData, bid: e.target.value })}
                         className="w-full pl-16 pr-4 py-2.5 text-sm font-mono bg-[#3e3e37] border border-[var(--line)] focus:border-white text-[var(--ivory)] placeholder:text-[var(--ivory-dim)]/50 outline-none transition-colors"
-                        placeholder={`Mayor a ${currentThreshold} (mínimo ${minAllowedBid})`}
+                        placeholder={`Mínimo sugerido $USD ${minAllowedBid}`}
                       />
                     </div>
 
-                    {/* ALERTA DE VALIDACIÓN SI ES MENOR O IGUAL AL MONTO INICIAL O ÚLTIMA PUJA */}
+                    {/* BOTONES DE PUJA RÁPIDA */}
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <span className="text-[10px] text-[var(--ivory-dim)] font-mono uppercase tracking-wider mr-1">
+                        Pujas sugeridas:
+                      </span>
+                      {[currentThreshold + 50, currentThreshold + 100, currentThreshold + 150, currentThreshold + 200].map((quickBid) => (
+                        <button
+                          key={quickBid}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, bid: String(quickBid) })}
+                          className={`px-2.5 py-1 text-xs font-mono rounded border transition-colors ${
+                            Number(formData.bid) === quickBid
+                              ? 'bg-[var(--gold)] text-black font-bold border-[var(--gold)]'
+                              : 'bg-[#4a4a42] text-[var(--gold-hi)] border-[var(--line-soft)] hover:border-[var(--gold)] hover:text-white'
+                          }`}
+                        >
+                          ${quickBid.toLocaleString()} (+${quickBid - currentThreshold})
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* ALERTA DE VALIDACIÓN SI ES MENOR AL ESCALÓN MÍNIMO */}
                     {formData.bid && !isBidValid && (
-                      <p className="mt-1.5 text-xs text-red-900 bg-red-100/90 p-2 border border-red-300 font-medium flex items-center gap-1.5">
+                      <p className="mt-2 text-xs text-red-900 bg-red-100/90 p-2 border border-red-300 font-medium flex items-center gap-1.5">
                         <AlertCircle size={14} className="shrink-0 text-red-700" />
                         <span>
-                          El monto debe ser estrictamente mayor a <strong>$USD {currentThreshold.toLocaleString()}</strong> (mínimo <strong>$USD {minAllowedBid.toLocaleString()}</strong>).
+                          El monto debe ser de al menos <strong>$USD {minAllowedBid.toLocaleString()}</strong> (las posturas aumentan en escalones de a $USD 50).
                         </span>
                       </p>
                     )}
@@ -750,6 +1012,141 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
           </Modal>
         );
       })()}
+
+      {/* MODAL DE ACREDITACIÓN OBLIGATORIA PARA INGRESAR A SUBASTAS */}
+      {showGateModal && (
+        <Modal
+          label="Acreditación previa para ingresar a Subastas"
+          onClose={() => {
+            setShowGateModal(false);
+          }}
+          size="md"
+          dismissOnBackdrop={Boolean(accreditedUser)}
+        >
+          <div className="p-6 md:p-8 bg-[var(--ink-2)] text-[var(--ivory)]">
+            <div className="text-center pb-5 border-b border-[var(--line-soft)]">
+              <div className="w-12 h-12 rounded-full bg-[var(--gold)]/15 border border-[var(--gold)]/50 flex items-center justify-center text-[var(--gold)] mx-auto mb-3">
+                <ShieldCheck size={24} />
+              </div>
+              <p className="eyebrow !text-[var(--gold-hi)]">Registro Oficial</p>
+              <h3 className="font-serif text-2xl md:text-3xl text-[var(--ivory)] font-medium mt-1">
+                Acreditación de Postulante
+              </h3>
+              <p className="text-xs text-[var(--ivory-dim)] max-w-md mx-auto leading-relaxed mt-2">
+                Para ingresar a la sección de subastas y participar en las preofertas de la colección inaugural, por favor completá tus datos de contacto e identificación.
+              </p>
+            </div>
+
+            {accreditationError && (
+              <div className="mt-4 p-3 bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-2">
+                <AlertCircle size={15} className="text-red-400 shrink-0" />
+                <span>{accreditationError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAccreditationSubmit} className="mt-5 space-y-4">
+              <div>
+                <label className="block text-xs uppercase font-mono tracking-wider text-[var(--ivory)] font-medium mb-1.5">
+                  Nombre y Apellido completo *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={accreditationForm.name}
+                  onChange={(e) =>
+                    setAccreditationForm({ ...accreditationForm, name: e.target.value })
+                  }
+                  placeholder="Tu nombre y apellido completo"
+                  className="w-full px-3.5 py-2.5 text-sm bg-[#3e3e37] border border-[var(--line)] focus:border-white text-[var(--ivory)] placeholder:text-[var(--ivory-dim)]/50 outline-none transition-colors"
+                  autoFocus
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs uppercase font-mono tracking-wider text-[var(--ivory)] font-medium mb-1.5">
+                    DNI / Documento *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={accreditationForm.dni}
+                    onChange={(e) =>
+                      setAccreditationForm({ ...accreditationForm, dni: e.target.value })
+                    }
+                    placeholder="Número de DNI"
+                    className="w-full px-3.5 py-2.5 text-sm bg-[#3e3e37] border border-[var(--line)] focus:border-white text-[var(--ivory)] placeholder:text-[var(--ivory-dim)]/50 outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase font-mono tracking-wider text-[var(--ivory)] font-medium mb-1.5">
+                    Correo electrónico *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={accreditationForm.email}
+                    onChange={(e) =>
+                      setAccreditationForm({ ...accreditationForm, email: e.target.value })
+                    }
+                    placeholder="tu@correo.com"
+                    className="w-full px-3.5 py-2.5 text-sm bg-[#3e3e37] border border-[var(--line)] focus:border-white text-[var(--ivory)] placeholder:text-[var(--ivory-dim)]/50 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase font-mono tracking-wider text-[var(--ivory)] font-medium mb-1.5">
+                  Teléfono de contacto / WhatsApp *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={accreditationForm.phone}
+                  onChange={(e) =>
+                    setAccreditationForm({ ...accreditationForm, phone: e.target.value })
+                  }
+                  placeholder="+54 ..."
+                  className="w-full px-3.5 py-2.5 text-sm bg-[#3e3e37] border border-[var(--line)] focus:border-white text-[var(--ivory)] placeholder:text-[var(--ivory-dim)]/50 outline-none transition-colors"
+                />
+              </div>
+
+              <div className="p-3 bg-[#4a4a42]/50 border border-[var(--gold)]/20 text-[11px] text-[var(--ivory-dim)] leading-relaxed">
+                Tus datos quedan registrados para respaldar la autenticidad y seriedad de las posturas en sala conforme a los estándares de <strong className="text-[var(--ivory)]">Insignia Casa de Arte</strong>.
+              </div>
+
+              <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+                {accreditedUser ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowGateModal(false)}
+                    className="px-4 py-2.5 text-xs font-sans uppercase tracking-wider text-[var(--ivory-dim)] hover:text-[var(--ivory)] order-2 sm:order-1"
+                  >
+                    Cancelar
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/')}
+                    className="px-4 py-2.5 text-xs font-sans uppercase tracking-wider text-[var(--ivory-dim)] hover:text-[var(--ivory)] order-2 sm:order-1"
+                  >
+                    ← Volver al inicio
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn-gold !py-2.5 !px-6 text-xs gap-2 w-full sm:w-auto justify-center order-1 sm:order-2"
+                >
+                  <ShieldCheck size={14} />
+                  <span>Ingresar al Catálogo de Subastas</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      )}
 
       {/* VISOR LIGHTBOX PARA AMPLIAR CUALQUIER OBRA */}
       {lightboxIndex !== null && (

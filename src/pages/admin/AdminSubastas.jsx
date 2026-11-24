@@ -12,6 +12,7 @@ import {
   X,
   Gavel,
   RotateCcw,
+  Download,
   Users,
   User,
   Phone,
@@ -31,6 +32,9 @@ import {
   formatDeadlineText,
   apiUploadImage,
   apiGetBids,
+  apiGetAccreditations,
+  apiDeleteAccreditation,
+  apiResetAllAccreditations,
 } from '../../lib/storage';
 
 export default function AdminSubastas({ onNotify }) {
@@ -61,6 +65,86 @@ export default function AdminSubastas({ onNotify }) {
 
   // Preofertas registradas
   const [preoffers, setPreoffers] = useState({});
+
+  // Modal para ver registro de acreditaciones
+  const [isAccreditationsModalOpen, setIsAccreditationsModalOpen] = useState(false);
+  const [accreditationsList, setAccreditationsList] = useState([]);
+  const [loadingAccreditations, setLoadingAccreditations] = useState(false);
+
+  const handleOpenAccreditations = async () => {
+    setIsAccreditationsModalOpen(true);
+    setLoadingAccreditations(true);
+    try {
+      const list = await apiGetAccreditations();
+      setAccreditationsList(list);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingAccreditations(false);
+    }
+  };
+
+  const handleDeleteAccreditation = async (id, name) => {
+    if (!window.confirm(`¿Seguro que deseas eliminar la acreditación de "${name}"?`)) return;
+    try {
+      const ok = await apiDeleteAccreditation(id);
+      if (ok) {
+        setAccreditationsList((prev) => prev.filter((a) => a.id !== id));
+        if (onNotify) onNotify(`Acreditación de ${name} eliminada`);
+      } else {
+        alert('No se pudo eliminar la acreditación.');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleResetAllAccreditations = async () => {
+    if (
+      !window.confirm(
+        '⚠️ ¿Deseas reiniciar todas las acreditaciones?\n\n' +
+        'Al hacerlo, el registro de la subasta actual comenzará de nuevo y todos los visitantes deberán completar la acreditación obligatoria para consultar el catálogo y participar de las preofertas.'
+      )
+    ) {
+      return;
+    }
+    try {
+      const ok = await apiResetAllAccreditations();
+      if (ok) {
+        setAccreditationsList([]);
+        if (onNotify) onNotify('Se reiniciaron todas las acreditaciones para la nueva subasta');
+      } else {
+        alert('No se pudo reiniciar las acreditaciones.');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const exportAccreditationsCSV = () => {
+    if (!accreditationsList.length) return;
+    const headers = ['#', 'Nombre', 'DNI', 'Email', 'Telefono', 'Fecha', 'Obras_Pujadas'];
+    const rows = accreditationsList.map((item, idx) => {
+      const bidsStr = (item.bids || []).map((b) => `${b.lotNumber}: $${b.amount}`).join('; ');
+      return [
+        idx + 1,
+        `"${(item.name || '').replace(/"/g, '""')}"`,
+        `"${(item.dni || '').replace(/"/g, '""')}"`,
+        `"${(item.email || '').replace(/"/g, '""')}"`,
+        `"${(item.phone || '').replace(/"/g, '""')}"`,
+        `"${(item.created_at || '').replace(/"/g, '""')}"`,
+        `"${bidsStr.replace(/"/g, '""')}"`,
+      ].join(',');
+    });
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `acreditaciones-insignia-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     loadData();
@@ -304,6 +388,16 @@ export default function AdminSubastas({ onNotify }) {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 self-start md:self-center">
+          <button
+            type="button"
+            onClick={handleOpenAccreditations}
+            className="btn-ghost text-xs py-2.5 px-3.5 rounded flex items-center justify-center gap-2 border-[var(--line)] hover:border-[var(--gold)]"
+            title="Ver visitantes acreditados para subastas"
+          >
+            <Users size={15} className="text-[var(--gold)]" />
+            <span>Acreditaciones</span>
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -972,6 +1066,179 @@ export default function AdminSubastas({ onNotify }) {
                 <CheckCircle2 size={15} />
                 Guardar Cierre
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal para ver registro de acreditaciones de postulantes */}
+      {isAccreditationsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[var(--ink-3)] border border-[var(--line)] rounded-xl max-w-4xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-[var(--line-soft)] pb-3">
+              <div>
+                <h3 className="font-serif text-xl text-[var(--ivory)] font-medium flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[var(--gold)]" />
+                  Visitantes Acreditados para Subastas
+                </h3>
+                <p className="text-xs text-[var(--ivory-dim)] mt-0.5">
+                  Registro de usuarios acreditados y seguimiento de las obras en las que han postulado preofertas.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAccreditationsModalOpen(false)}
+                className="text-[var(--ivory-dim)] hover:text-[var(--ivory)] p-1 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 pr-1 space-y-3">
+              {loadingAccreditations ? (
+                <div className="py-12 text-center text-xs text-[var(--ivory-dim)]">
+                  Cargando acreditaciones desde el servidor...
+                </div>
+              ) : accreditationsList.length === 0 ? (
+                <div className="py-12 text-center border border-[var(--line-soft)] rounded-lg bg-[var(--ink-2)]/40 p-6">
+                  <Users className="w-10 h-10 text-[var(--ivory-dim)]/40 mx-auto mb-2" />
+                  <p className="text-sm text-[var(--ivory)] font-medium">Aún no hay acreditaciones registradas</p>
+                  <p className="text-xs text-[var(--ivory-dim)] mt-1">
+                    Los visitantes que ingresen sus datos aparecerán listados aquí en tiempo real.
+                  </p>
+                </div>
+              ) : (
+                <div className="border border-[var(--line-soft)] rounded-lg overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs min-w-[700px]">
+                    <thead>
+                      <tr className="bg-[var(--ink-2)] border-b border-[var(--line-soft)] text-[var(--gold)] font-mono uppercase tracking-wider text-[11px]">
+                        <th className="p-3">#</th>
+                        <th className="p-3">Nombre y Apellido</th>
+                        <th className="p-3">DNI</th>
+                        <th className="p-3">Contacto</th>
+                        <th className="p-3">Obras / Preofertas</th>
+                        <th className="p-3">Fecha</th>
+                        <th className="p-3 text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--line-soft)]">
+                      {accreditationsList.map((item, idx) => (
+                        <tr key={item.id || idx} className="hover:bg-[var(--ink-2)]/50 transition-colors align-top">
+                          <td className="p-3 font-mono text-[var(--ivory-dim)]">
+                            {String(idx + 1).padStart(2, '0')}
+                          </td>
+                          <td className="p-3 font-medium text-[var(--ivory)]">
+                            {item.name}
+                          </td>
+                          <td className="p-3 font-mono text-[var(--gold-hi)] font-semibold whitespace-nowrap">
+                            {item.dni}
+                          </td>
+                          <td className="p-3 space-y-1 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 text-[var(--ivory)]">
+                              <Mail size={12} className="text-[var(--gold)] shrink-0" />
+                              <a href={`mailto:${item.email}`} className="hover:underline">
+                                {item.email}
+                              </a>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[var(--ivory-dim)]">
+                              <Phone size={12} className="text-[var(--gold)] shrink-0" />
+                              <a
+                                href={`https://wa.me/${String(item.phone || '').replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="hover:text-[var(--gold-hi)]"
+                              >
+                                {item.phone}
+                              </a>
+                            </div>
+                          </td>
+                          <td className="p-3 min-w-[220px]">
+                            {item.bids && item.bids.length > 0 ? (
+                              <div className="space-y-1.5">
+                                {item.bids.map((b, bIdx) => (
+                                  <div
+                                    key={bIdx}
+                                    className="p-1.5 rounded bg-[var(--ink-1)]/90 border border-[var(--gold)]/35 text-[11px]"
+                                  >
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="font-semibold text-[var(--gold-hi)] font-mono">
+                                        {b.lotNumber}
+                                      </span>
+                                      <span className="font-mono font-bold text-white">
+                                        $USD {Number(b.amount).toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div className="text-[10px] text-[var(--ivory-dim)] truncate mt-0.5" title={b.title}>
+                                      {b.title} {b.artist ? `— ${b.artist}` : ''}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-[var(--ink-2)] text-[var(--ivory-dim)] border border-[var(--line-soft)]">
+                                Solo acreditado (sin pujas aún)
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-3 font-mono text-[var(--ivory-dim)] text-[11px] whitespace-nowrap">
+                            {item.created_at ? new Date(item.created_at).toLocaleString() : '—'}
+                          </td>
+                          <td className="p-3 text-right whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAccreditation(item.id, item.name)}
+                              className="p-1.5 rounded text-[var(--ivory-dim)] hover:text-red-400 hover:bg-red-950/40 border border-transparent hover:border-red-500/30 transition-colors"
+                              title={`Eliminar acreditación de ${item.name}`}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[var(--line-soft)] pt-3.5">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-[var(--ivory-dim)] font-mono">
+                  Total acreditados: <strong className="text-[var(--gold-hi)]">{accreditationsList.length}</strong>
+                </span>
+
+                {accreditationsList.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={exportAccreditationsCSV}
+                    className="text-[11px] text-[var(--gold-hi)] hover:underline flex items-center gap-1 font-mono"
+                    title="Descargar lista de contactos en archivo CSV (Excel)"
+                  >
+                    <Download size={13} />
+                    <span>Descargar CSV</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleResetAllAccreditations}
+                  disabled={accreditationsList.length === 0}
+                  className="px-3 py-2 rounded text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-500/30 transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="Reiniciar todas las acreditaciones para que todos los usuarios deban registrarse de nuevo"
+                >
+                  <RotateCcw size={13} />
+                  <span>Reiniciar Acreditaciones</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAccreditationsModalOpen(false)}
+                  className="btn-gold text-xs py-2 px-5 rounded"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>

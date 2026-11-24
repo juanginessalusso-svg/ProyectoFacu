@@ -8,14 +8,10 @@ export default function Services() {
       <div className="wrap">
         <div className="m2-servicios__inner">
           <div>
-            <div className="m2-eyebrow">ÁREAS DE ESPECIALIDAD</div>
             <div className="m2-head">
               <h2>
-                Nuestros <em>servicios</em>
+                Áreas <em>Insignia</em>
               </h2>
-              <p>
-                Acompañamiento profesional, transparencia y rigor en cada etapa del mercado del arte.
-              </p>
             </div>
           </div>
 

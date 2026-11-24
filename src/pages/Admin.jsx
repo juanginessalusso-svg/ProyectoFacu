@@ -22,6 +22,7 @@ import {
 import AdminSubastas from './admin/AdminSubastas';
 import AdminEventos from './admin/AdminEventos';
 import AdminGaleria from './admin/AdminGaleria';
+import BrandLogo, { InsigniaWordmark } from '../components/BrandLogo';
 import {
   resetAllToDefaults,
   exportAllData,
@@ -58,6 +59,14 @@ export default function Admin() {
   useEffect(() => {
     document.title = 'Panel de Administración · Subastas Insignia';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    const prevRobots = metaRobots?.getAttribute('content') || 'index, follow';
+    if (metaRobots) {
+      metaRobots.setAttribute('content', 'noindex, nofollow');
+    }
+    return () => {
+      if (metaRobots) metaRobots.setAttribute('content', prevRobots);
+    };
   }, [activeTab]);
 
   const notify = (msg) => {
@@ -149,7 +158,7 @@ export default function Admin() {
   // Restaurar todo al estado inicial
   const handleResetDefaults = () => {
     const confirmed = window.confirm(
-      '¿Estás seguro de restaurar todos los datos a los valores iniciales oficiales? Se recuperarán los 24 lotes del PDF y las fotos de inauguración.'
+      '¿Estás seguro de restaurar todos los datos a los valores iniciales oficiales? Se recuperarán los 23 lotes del PDF y las fotos de inauguración.'
     );
     if (confirmed) {
       resetAllToDefaults();
@@ -169,9 +178,9 @@ export default function Admin() {
             <h1 className="font-serif text-2xl md:text-3xl text-[var(--ivory)] font-light">
               Panel de Administración
             </h1>
-            <p className="text-xs uppercase tracking-widest text-[var(--gold)] font-medium">
-              Subastas Insignia
-            </p>
+            <div className="pt-2 pb-1 flex justify-center">
+              <BrandLogo className="inline-flex items-baseline justify-center gap-2.5" />
+            </div>
             <p className="text-xs text-[var(--ivory-dim)]">
               Ingresa el código PIN de acceso para gestionar obras, eventos y galería.
             </p>
@@ -251,9 +260,10 @@ export default function Admin() {
         </button>
 
         <div className="flex items-center gap-2.5">
-          <span className="font-serif text-base font-light tracking-wide text-white">
-            Insignia <span className="italic text-[#e2d7c0]">Admin</span>
-          </span>
+          <Link to="/" className="flex items-baseline gap-1.5 text-white hover:opacity-85 transition-opacity" title="Ir al sitio público">
+            <InsigniaWordmark className="h-[20px] w-auto text-white" />
+            <span className="italic text-[#e2d7c0] font-serif text-sm">Admin</span>
+          </Link>
           <span className="text-[9px] bg-[#5A5A50]/40 text-[#e2d7c0] font-mono px-2 py-0.5 rounded border border-[#5A5A50] uppercase">
             Panel
           </span>
@@ -279,9 +289,10 @@ export default function Admin() {
       >
         {/* Cabecera del Sidebar */}
         <div className="p-6 border-b border-white/10">
-          <h1 className="font-serif text-2xl font-light tracking-wide text-white">
-            Insignia <span className="italic text-[#e2d7c0]">Admin</span>
-          </h1>
+          <Link to="/" className="flex items-baseline gap-2 text-white hover:opacity-85 transition-opacity" title="Ir al sitio público">
+            <InsigniaWordmark className="h-[24px] w-auto text-white" />
+            <span className="italic text-[#e2d7c0] font-serif text-base">Admin</span>
+          </Link>
           <p className="text-[11px] text-zinc-400 mt-1">
             Galería de Arte · Panel de Control
           </p>
@@ -555,7 +566,7 @@ export default function Admin() {
                   <h3 className="font-serif text-base font-semibold">Restaurar al Catálogo Oficial Inicial</h3>
                 </div>
                 <p className="text-xs text-[var(--ivory-dim)] leading-relaxed">
-                  Si deseas reiniciar el sitio a su estado original, esto volverá a cargar los 24 lotes auténticos del catálogo oficial inaugurado en Río Cuarto, los eventos iniciales y la galería estándar.
+                  Si deseas reiniciar el sitio a su estado original, esto volverá a cargar los 23 lotes auténticos del catálogo oficial inaugurado en Río Cuarto, los eventos iniciales y la galería estándar.
                 </p>
                 <button
                   onClick={handleResetDefaults}

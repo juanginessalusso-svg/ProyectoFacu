@@ -2,7 +2,7 @@
  * Catálogo Oficial Inaugural de Subastas Insignia
  * Auditado y verificado página por página contra el documento oficial:
  * "_Catálogo de Venta Galería Insignia .pdf" (41 páginas)
- * Total: 24 lotes auténticos
+ * Total: 23 lotes auténticos (corregida duplicación del lote de Otegui)
  */
 
 export const LOTS = [
@@ -251,18 +251,6 @@ export const LOTS = [
   {
     id: 21,
     lote: 'Lote #21',
-    title: 'La Casa de Doña Pancha',
-    artist: 'Héctor Otegui',
-    technique: 'Óleo',
-    dimensions: '50 × 60 cm',
-    year: '2002',
-    basePrice: '$USD 400',
-    priceValue: 400,
-    image: '/img/subastas/lote-21.jpg?v=2',
-  },
-  {
-    id: 22,
-    lote: 'Lote #22',
     title: 'Santa Juana de Arco',
     artist: 'Ricardo Fernández',
     technique: 'Scrap metal (chatarra soldada)',
@@ -273,8 +261,8 @@ export const LOTS = [
     image: '/img/subastas/lote-22.jpg?v=2',
   },
   {
-    id: 23,
-    lote: 'Lote #23',
+    id: 22,
+    lote: 'Lote #22',
     title: 'Caballo en Carrera',
     artist: 'Ricardo Fernández',
     technique: 'Scrap metal (chatarra soldada)',
@@ -285,8 +273,8 @@ export const LOTS = [
     image: '/img/subastas/lote-23.jpg?v=2',
   },
   {
-    id: 24,
-    lote: 'Lote #24',
+    id: 23,
+    lote: 'Lote #23',
     title: 'Caballo Libre',
     artist: 'Ricardo Fernández',
     technique: 'Scrap metal (chatarra soldada)',

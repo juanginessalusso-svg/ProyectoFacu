@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuestros servicios · Subastas Insignia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+
+  .servicios {
+    background: #5f6057;
+    padding: 96px 120px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .servicios__inner { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+
+  .eyebrow { display: flex; align-items: center; gap: 12px; color: #d8cfae; font-size: 12px; font-weight: 600; letter-spacing: .3em; margin-bottom: 14px; }
+  .eyebrow::before { content: ""; width: 18px; height: 1px; background: #d8cfae; }
+
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 48px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,.14); }
+  .head h2 { margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 72px; line-height: 1; color: #fbf8f0; }
+  .head h2 em { font-weight: 600; }
+  .head p { margin: 0; max-width: 420px; font-size: 16px; line-height: 1.55; color: #e3dcc3; }
+
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+
+  .panel { position: relative; min-height: 520px; border-radius: 16px; overflow: hidden; background: #2c2d27;
+           display: flex; flex-direction: column; justify-content: space-between; }
+  .panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .panel::before { content: ""; position: absolute; inset: 0; z-index: 1;
+                   background: linear-gradient(to bottom, rgba(28,28,24,.35) 0%, rgba(28,28,24,.55) 40%, rgba(24,24,20,.96) 100%); }
+  .panel__num { position: relative; z-index: 2; padding: 28px 28px 0; font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; letter-spacing: .12em; color: #e6d9a8; }
+  .panel__body { position: relative; z-index: 2; padding: 0 28px 32px; display: flex; flex-direction: column; gap: 14px; }
+  .panel__body::before { content: ""; width: 32px; height: 1px; background: #d8cfae; }
+  .panel h3 { margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 36px; color: #fbf8f0; }
+  .panel p { margin: 0; font-size: 14px; line-height: 1.7; color: #e3dcc3; }
+
+  @media (max-width: 1100px) {
+    .servicios { padding: 72px 32px; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .head { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .head h2 { font-size: 56px; }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .panel { min-height: 420px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="servicios">
+  <div class="servicios__inner">
+    <div>
+      <div class="eyebrow">ÁREAS DE ESPECIALIDAD</div>
+      <div class="head">
+        <h2>Nuestros <em>servicios</em></h2>
+        <p>Acompañamiento profesional, transparencia y rigor en cada etapa del mercado del arte.</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <article class="panel">
+        <img src="foto-1.jpg" alt="Obras expuestas en sala de curaduría">
+        <div class="panel__num">01</div>
+        <div class="panel__body">
+          <h3>Curaduría</h3>
+          <p>Selección y montaje de piezas con criterio profesional para que cada obra luzca su máximo potencial.</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <img src="foto-2.jpg" alt="Visitantes observando cuadros en la galería">
+        <div class="panel__num">02</div>
+        <div class="panel__body">
+          <h3>Tasación</h3>
+          <p>Valoración profesional de obras y antigüedades con respaldo documental y peritaje calificado.</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <img src="foto-3.jpg" alt="Sala llena durante una subasta presencial">
+        <div class="panel__num">03</div>
+        <div class="panel__body">
+          <h3>Subastas</h3>
+          <p>Subastas presenciales en sala con convocatoria a coleccionistas e inversores del país.</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <img src="foto-4.jpg" alt="Dos personas conversando frente a una obra">
+        <div class="panel__num">04</div>
+        <div class="panel__body">
+          <h3>Consignaciones</h3>
+          <p>Recepción de obras en consignación y vinculación directa con el mercado de arte.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

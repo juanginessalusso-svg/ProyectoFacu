@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Lightbox from './Lightbox';
 import { cx } from '../lib/format';
 import { getGalleryPhotos } from '../lib/storage';
+import { InsigniaMonogram } from './BrandLogo';
 
 // Ratios aspect de diseño editorial por posición
 const ASPECT_RATIOS = ['16/10', '4/5', '21/9', '4/5', '4/3', '3/2', '3/2', '4/3'];
@@ -97,9 +98,12 @@ export default function Gallery() {
         {/* CABECERA EDITORIAL MODELO 3 */}
         <div className="pb-8 pt-4 border-b border-[var(--line-soft)]">
           <p className="eyebrow">Espacio de arte</p>
-          <h1 className="m3g-h1">
-            La <em>galería</em>
-          </h1>
+          <div className="flex items-center gap-3.5 sm:gap-5 mt-2">
+            <InsigniaMonogram className="h-[46px] sm:h-[58px] md:h-[68px] w-auto text-[#e2d7c0] shrink-0" />
+            <h1 className="m3g-h1 !mt-0">
+              Galería <em>Insignia</em>
+            </h1>
+          </div>
           <p className="text-base sm:text-lg md:text-xl text-[var(--ivory-dim)] font-medium tracking-wide mt-3">
             Alberdi 355 · Río Cuarto, Córdoba
           </p>

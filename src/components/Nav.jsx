@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { cx, reduced } from '../lib/format';
+import BrandLogo from './BrandLogo';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -44,15 +45,14 @@ export default function Nav() {
       <div className="wrap nav-row">
         <Link
           to="/"
-          className="brand"
+          className="brand group"
           aria-label="Subastas Insignia, inicio"
           onClick={() => {
             setOpen(false);
             window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
           }}
         >
-          <span className="brand-s">Subastas</span>
-          <span className="brand-i">Insignia</span>
+          <BrandLogo />
         </Link>
 
         <ul className="nav-links">

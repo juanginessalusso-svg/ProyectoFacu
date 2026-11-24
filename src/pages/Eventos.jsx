@@ -1,7 +1,92 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Clock, MapPin, ArrowRight, Images, Calendar, Sparkles, CheckCircle2 } from 'lucide-react';
 import { getEvents } from '../lib/storage';
+import { reduced } from '../lib/format';
 import Lightbox from '../components/Lightbox';
+
+function EventPhotoCarousel({ event, onOpenLightbox }) {
+  const images = useMemo(() => {
+    if (Array.isArray(event.images) && event.images.length > 0) return event.images;
+    if (event.image) return [event.image];
+    return ['/img/sala-exhibicion.jpg'];
+  }, [event.images, event.image]);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Deslizamiento automático continuo cada 3.8 segundos
+  useEffect(() => {
+    if (images.length <= 1 || reduced()) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  const goToPrev = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const goToNext = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  return (
+    <div
+      className="group relative overflow-hidden aspect-[4/3] md:aspect-[21/9] min-h-[250px] cursor-pointer bg-[#2c2b26] select-none"
+      onClick={() => onOpenLightbox(event, currentIndex)}
+      title="Clic para ampliar en alta resolución"
+    >
+      {/* Pista deslizable horizontal (Slide Effect) */}
+      <div
+        className="flex w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {images.map((src, idx) => (
+          <div key={src + idx} className="min-w-full w-full h-full shrink-0 relative overflow-hidden">
+            <img
+              src={src}
+              alt={`${event.title} - Fotografía ${idx + 1}`}
+              loading={idx === 0 ? 'eager' : 'lazy'}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              onError={(e) => {
+                e.target.src = '/img/sala-exhibicion.jpg';
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Flechas laterales sutiles que aparecen solo al pasar el cursor */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/45 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/20 hover:scale-105 cursor-pointer"
+            onClick={goToPrev}
+            aria-label="Fotografía anterior"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/45 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/20 hover:scale-105 cursor-pointer"
+            onClick={goToNext}
+            aria-label="Siguiente fotografía"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
 
 function AnimatedCard({ children, className = '', delay = 0 }) {
   const [inView, setInView] = useState(false);
@@ -124,13 +209,6 @@ export default function Eventos() {
           {/* Listado Editorial de Eventos Realizados */}
           <div className="grid gap-12 mt-12">
             {filteredPastEvents.map((ev, eventIdx) => {
-              const evImages = Array.isArray(ev.images) && ev.images.length > 0
-                ? ev.images
-                : (ev.image ? [ev.image] : []);
-              const coverImage = ev.image || evImages[0] || '/img/sala-exhibicion.jpg';
-              const hasMoreThanSix = evImages.length > 7;
-              const thumbsToShow = hasMoreThanSix ? evImages.slice(1, 6) : evImages.slice(1, 7);
-
               return (
                 <AnimatedCard
                   key={ev.id || eventIdx}
@@ -176,81 +254,12 @@ export default function Eventos() {
                     )}
                   </div>
 
-                  {/* Galería Fotográfica: Foto grande a todo el ancho + Miniaturas */}
+                  {/* Galería Fotográfica: Carrusel Automático + Miniaturas sincronizadas */}
                   <div className="px-6 pb-6 md:px-12 md:pb-12">
-                    {/* Foto Principal */}
-                    <div
-                      className="group relative flex items-center justify-center overflow-hidden aspect-[4/3] md:aspect-[21/9] min-h-[240px] cursor-pointer bg-gradient-to-br from-[#3a3932] to-[#62615a]"
-                      onClick={() => handleOpenLightbox(ev, 0)}
-                      title="Clic para ampliar en alta resolución"
-                    >
-                      <img
-                        src={coverImage}
-                        alt={ev.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        onError={(e) => {
-                          e.target.src = '/img/sala-exhibicion.jpg';
-                        }}
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                      <div className="absolute left-4 right-4 bottom-4 md:left-5 md:right-5 md:bottom-5 z-10 flex items-center justify-between gap-3">
-                        <span className="bg-[#121210]/80 backdrop-blur-md text-white text-xs md:text-sm font-semibold tracking-wider px-3.5 py-2">
-                          Foto 1 de {evImages.length}
-                        </span>
-                        <button
-                          type="button"
-                          className="bg-[#121210]/80 hover:bg-black backdrop-blur-md text-white text-xs md:text-sm font-medium px-3.5 py-2 inline-flex items-center gap-2 transition-colors cursor-pointer border-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenLightbox(ev, 0);
-                          }}
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <rect x="8" y="3" width="13" height="13" rx="1"></rect>
-                            <path d="M16 20H4a1 1 0 0 1-1-1V8"></path>
-                          </svg>
-                          <span>Ampliar galería</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Mosaico de Miniaturas debajo */}
-                    {evImages.length > 1 && (
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-3">
-                        {thumbsToShow.map((thumbUrl, tIdx) => {
-                          const globalIdx = tIdx + 1;
-                          return (
-                            <button
-                              type="button"
-                              key={tIdx}
-                              className="aspect-square p-0 border-0 cursor-pointer relative overflow-hidden bg-gradient-to-br from-[#3d3c35] to-[#66655a] group focus-visible:outline-2 focus-visible:outline-white"
-                              onClick={() => handleOpenLightbox(ev, globalIdx)}
-                              aria-label={`Ver foto ${globalIdx + 1}`}
-                            >
-                              <img
-                                src={thumbUrl}
-                                alt=""
-                                loading="lazy"
-                                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                              />
-                            </button>
-                          );
-                        })}
-
-                        {hasMoreThanSix && (
-                          <button
-                            type="button"
-                            className="aspect-square p-0 border-0 cursor-pointer bg-[#1c1b17] hover:bg-black text-white font-semibold text-base flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-white"
-                            onClick={() => handleOpenLightbox(ev, 6)}
-                            aria-label={`Ver ${evImages.length - 6} fotos más`}
-                          >
-                            +{evImages.length - 6}
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    <EventPhotoCarousel
+                      event={ev}
+                      onOpenLightbox={handleOpenLightbox}
+                    />
                   </div>
                 </AnimatedCard>
               );

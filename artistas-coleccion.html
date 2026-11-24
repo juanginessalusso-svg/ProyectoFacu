@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Artistas de la colección · Subastas Insignia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  ============================================================
+  SECCIÓN "ARTISTAS DE LA COLECCIÓN" · versión lista editorial
+  ============================================================
+  Cómo integrarla en el proyecto:
+  1) Reemplazar la sección actual por el bloque <section id="artistas"> + el bloque del visor (#vo).
+  2) Pasar el CSS (bloque <style>) al archivo de estilos del proyecto.
+  3) Reemplazar el array ARTISTAS del <script> por los datos reales que ya existen
+     (portrait = foto del artista, works[].img = imagen de la obra).
+  4) Si un artista tiene más de una obra, agregarlas en works: el visor muestra flechas solo en ese caso.
+  Los textos entre [CORCHETES] son placeholders que deben reemplazarse por datos reales.
+-->
+
+<style>
+:root{
+  --bg:#4f4e43;
+  --bg-dark:#3a3930;
+  --cream:#ece6d4;
+  --cream-soft:#d8d2bf;
+  --line:rgba(236,230,212,0.18);
+  --serif:'Cormorant Garamond',serif;
+  --sans:'Montserrat',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--sans)}
+
+/* ---------- Sección ---------- */
+.artistas{padding:96px clamp(20px,6vw,80px) 120px}
+.artistas__eyebrow{display:flex;align-items:center;gap:20px}
+.artistas__eyebrow::before{content:"";width:40px;height:1px;background:var(--cream)}
+.artistas__eyebrow span{font-size:12px;font-weight:600;letter-spacing:.35em;color:var(--cream-soft)}
+.artistas__title{margin:24px 0 0;font-family:var(--serif);font-weight:400;font-size:clamp(48px,7vw,92px);line-height:1.05}
+.artistas__list{margin-top:64px;display:flex;flex-direction:column}
+
+.art-row{display:flex;flex-wrap:wrap;align-items:center;gap:40px 80px;padding:40px 0;border-top:1px solid var(--line)}
+.art-row__media{flex:0 1 440px;min-height:340px;height:340px}
+.art-row:nth-child(even) .art-row__media{order:2}
+.art-row__media img{width:100%;height:100%;object-fit:cover;display:block}
+.art-row__text{flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.art-row__name{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(40px,5vw,64px);line-height:1.02}
+.art-row__meta{margin:0;font-size:12px;font-weight:600;letter-spacing:.18em;line-height:1.6;text-transform:uppercase}
+.art-row__bio{margin:0;max-width:560px;font-size:17px;line-height:1.65;color:var(--cream-soft)}
+.art-row__work{margin:0;padding-top:16px;max-width:560px;border-top:1px solid var(--line);font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--cream-soft);text-transform:uppercase}
+
+.ph{width:100%;height:100%;background:var(--bg-dark);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;letter-spacing:.3em;color:#cfc9b6;text-align:center;padding:16px}
+
+.btn{align-self:flex-start;height:44px;padding:0 20px;display:inline-flex;align-items:center;background:transparent;color:var(--cream);border:1px solid rgba(236,230,212,.5);font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.22em;cursor:pointer;transition:background .2s,border-color .2s}
+.btn:hover{background:rgba(236,230,212,.1);border-color:var(--cream)}
+.btn:focus-visible,.vo button:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+
+@media (max-width:960px){
+  .art-row{gap:28px}
+  .art-row:nth-child(even) .art-row__media{order:0}
+  .art-row__media{flex:1 1 100%;height:300px;min-height:300px}
+}
+
+/* ---------- Visor de la obra ---------- */
+.vo{position:fixed;inset:0;z-index:1000;background:rgba(10,10,8,.92);display:flex}
+.vo[hidden]{display:none}
+.vo__panel{position:relative;flex:1;display:flex;flex-direction:column;padding:72px clamp(16px,4vw,56px) 24px;min-width:0;outline:none}
+.vo__close{position:absolute;top:12px;right:12px;height:44px;padding:0 16px;background:transparent;color:var(--cream);border:0;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.22em;cursor:pointer}
+.vo__stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:16px}
+.vo__fig{margin:0;flex:1;min-width:0;height:100%;display:flex;align-items:center;justify-content:center}
+.vo__fig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.vo__fig .ph{max-width:900px;height:min(60vh,560px)}
+.vo__nav{flex:0 0 auto;width:48px;height:48px;border-radius:50%;background:transparent;color:var(--cream);border:1px solid rgba(236,230,212,.5);font-size:20px;cursor:pointer}
+.vo__nav[hidden]{display:none}
+.vo__cap{padding-top:20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 24px}
+.vo__title{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(28px,3.4vw,40px);line-height:1.1;color:var(--cream)}
+.vo__sub{margin:6px 0 0;font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--cream-soft);text-transform:uppercase}
+@media (max-width:600px){.vo__nav{width:44px;height:44px}}
+</style>
+</head>
+<body>
+
+<!-- ===== INICIO SECCIÓN ARTISTAS ===== -->
+<section class="artistas" id="artistas">
+  <div class="artistas__eyebrow"><span>REPARTO</span></div>
+  <h2 class="artistas__title">Artistas de la <em>colección</em></h2>
+  <div class="artistas__list" id="artistas-list"></div>
+</section>
+
+<!-- Visor de la obra -->
+<div class="vo" id="vo" hidden>
+  <div class="vo__panel" role="dialog" aria-modal="true" aria-labelledby="vo-title" tabindex="-1">
+    <button type="button" class="vo__close" id="vo-close">CERRAR ×</button>
+    <div class="vo__stage">
+      <button type="button" class="vo__nav" id="vo-prev" aria-label="Obra anterior">←</button>
+      <figure class="vo__fig" id="vo-fig"></figure>
+      <button type="button" class="vo__nav" id="vo-next" aria-label="Obra siguiente">→</button>
+    </div>
+    <div class="vo__cap">
+      <div>
+        <h3 class="vo__title" id="vo-title"></h3>
+        <p class="vo__sub" id="vo-sub"></p>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== FIN SECCIÓN ARTISTAS ===== -->
+
+<script>
+/* Datos de los artistas. Reemplazar por los datos reales del proyecto. */
+const PH = { years: '[AÑOS]', discipline: '[DISCIPLINA]', bio: '[Reseña breve del artista: 2 o 3 líneas.]' };
+const ARTISTAS = [
+  { name: 'Guillermo Roux', years: '1929 – 2021', discipline: 'Pintura, acuarela y dibujo',
+    bio: 'Gran maestro de la pintura y la acuarela argentina de trascendencia internacional. Su obra transita una figuración poética y luminosa, con un virtuosismo técnico inconfundible que marcó la historia del arte nacional.',
+    portrait: '', works: [{ title: 'San Martín', technique: 'Acuarela', img: '' }] },
+  { name: 'Héctor Otegui', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Lara Ponsone', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Gabriel Sáenz', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Cristina Santander', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Ricardo Bonati', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Carlos Keipert', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Alicia Díaz Rinaldi', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] },
+  { name: 'Ricardo Fernández', ...PH, portrait: '', works: [{ title: '[Título]', technique: '[Técnica]', img: '' }] }
+];
+
+(function () {
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); };
+
+  /* ---------- Lista ---------- */
+  var list = document.getElementById('artistas-list');
+  list.innerHTML = ARTISTAS.map(function (a, i) {
+    var media = a.portrait
+      ? '<img src="' + esc(a.portrait) + '" alt="Retrato de ' + esc(a.name) + '">'
+      : '<div class="ph">[RETRATO]</div>';
+    return '<article class="art-row">' +
+      '<div class="art-row__media">' + media + '</div>' +
+      '<div class="art-row__text">' +
+        '<h3 class="art-row__name">' + esc(a.name) + '</h3>' +
+        '<p class="art-row__meta">' + esc(a.years) + ' · ' + esc(a.discipline) + '</p>' +
+        '<p class="art-row__bio">' + esc(a.bio) + '</p>' +
+        '<p class="art-row__work">Obra destacada · ' + esc(a.works[0].title) + ' (' + esc(a.works[0].technique) + ')</p>' +
+        '<button type="button" class="btn" data-artist="' + i + '">VER OBRA →</button>' +
+      '</div></article>';
+  }).join('');
+
+  /* ---------- Visor ---------- */
+  var vo = document.getElementById('vo');
+  var panel = vo.querySelector('.vo__panel');
+  var fig = document.getElementById('vo-fig');
+  var elTitle = document.getElementById('vo-title');
+  var elSub = document.getElementById('vo-sub');
+  var btnPrev = document.getElementById('vo-prev');
+  var btnNext = document.getElementById('vo-next');
+  var btnClose = document.getElementById('vo-close');
+  var current = { artist: null, work: 0, opener: null };
+
+  function render() {
+    var a = ARTISTAS[current.artist];
+    var w = a.works[current.work];
+    var many = a.works.length > 1;
+    fig.innerHTML = w.img
+      ? '<img src="' + esc(w.img) + '" alt="' + esc(w.title) + ', ' + esc(w.technique) + ', de ' + esc(a.name) + '">'
+      : '<div class="ph">[OBRA]</div>';
+    elTitle.textContent = w.title;
+    elSub.textContent = w.technique + ' · ' + a.name;
+    btnPrev.hidden = !many;
+    btnNext.hidden = !many;
+    panel.setAttribute('aria-label', 'Obra de ' + a.name);
+  }
+
+  function open(artistIdx, opener) {
+    current = { artist: artistIdx, work: 0, opener: opener };
+    render();
+    vo.hidden = false;
+    document.body.style.overflow = 'hidden';
+    panel.focus();
+  }
+
+  function close() {
+    vo.hidden = true;
+    document.body.style.overflow = '';
+    if (current.opener) current.opener.focus();
+  }
+
+  function step(dir) {
+    var n = ARTISTAS[current.artist].works.length;
+    current.work = (current.work + dir + n) % n;
+    render();
+  }
+
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-artist]');
+    if (b) open(Number(b.getAttribute('data-artist')), b);
+  });
+  btnClose.addEventListener('click', close);
+  btnPrev.addEventListener('click', function () { step(-1); });
+  btnNext.addEventListener('click', function () { step(1); });
+  vo.addEventListener('click', function (e) {
+    if (!e.target.closest('img, .ph, button, .vo__cap')) close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (vo.hidden) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'ArrowLeft' && !btnPrev.hidden) step(-1);
+    if (e.key === 'ArrowRight' && !btnNext.hidden) step(1);
+    if (e.key === 'Tab') {
+      var f = Array.prototype.filter.call(panel.querySelectorAll('button'), function (b) { return !b.hidden; });
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+})();
+</script>
+</body>
+</html>
