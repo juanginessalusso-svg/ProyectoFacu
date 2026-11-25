@@ -1,5 +1,5 @@
 import { LOTS as DEFAULT_LOTS } from '../data/subastas';
-import { IMAGES } from '../data/content';
+import { IMAGES, HOME_DEFAULTS } from '../data/content';
 
 export const STORAGE_KEYS = {
   LOTS: 'insignia_admin_lots_v4',
@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   PIN: 'insignia_admin_pin_v3',
   DEADLINE: 'insignia_admin_deadline_v3',
   GALLERY_INTRO: 'insignia_admin_gallery_intro_v1',
+  HOME: 'insignia_admin_home_v1',
   TOKEN: 'insignia_admin_token',
 };
 
@@ -209,6 +210,9 @@ export async function syncFromServer() {
     if (data.galleryIntro && typeof data.galleryIntro === 'object') {
       localStorage.setItem(STORAGE_KEYS.GALLERY_INTRO, JSON.stringify(data.galleryIntro));
     }
+    if (data.home && typeof data.home === 'object') {
+      localStorage.setItem(STORAGE_KEYS.HOME, JSON.stringify(data.home));
+    }
 
     // Sincronizar preofertas públicas registradas en la base de datos
     try {
@@ -313,6 +317,87 @@ export async function saveGalleryIntro(intro) {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return true;
+}
+
+// --- CONTENIDO DE LA PÁGINA DE INICIO ---
+export function getHome() {
+  let saved = null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.HOME);
+    saved = raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    saved = null;
+  }
+  const d = HOME_DEFAULTS;
+  const s = saved || {};
+  const pick = (v, fallback) => (typeof v === 'string' && v.trim() ? v : fallback);
+  return {
+    heroTitle: pick(s.heroTitle, d.heroTitle),
+    heroSlides: Array.isArray(s.heroSlides) && s.heroSlides.length > 0 ? s.heroSlides : d.heroSlides,
+    artistsTitle: pick(s.artistsTitle, d.artistsTitle),
+    artistsIntro: pick(s.artistsIntro, d.artistsIntro),
+    servicesTitle: pick(s.servicesTitle, d.servicesTitle),
+    services: d.services.map((def, i) => {
+      const o = Array.isArray(s.services) ? s.services[i] || {} : {};
+      return {
+        title: pick(o.title, def.title),
+        text: pick(o.text, def.text),
+        image: pick(o.image, def.image),
+        alt: def.alt,
+      };
+    }),
+  };
+}
+
+export async function saveHome(home) {
+  localStorage.setItem(STORAGE_KEYS.HOME, JSON.stringify(home));
+  notifyChange();
+  const res = await fetch(`${API_BASE}/home`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(home),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return true;
+}
+
+// --- RESERVAS DE ASISTENCIA A EVENTOS ---
+export async function apiSubmitReservation(payload) {
+  try {
+    const res = await fetch(`${API_BASE}/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return { success: false, error: data.error || 'No se pudo enviar la solicitud' };
+    return { success: true };
+  } catch (err) {
+    return { success: false, isOffline: true, error: 'No pudimos conectar con el servidor' };
+  }
+}
+
+export async function apiGetReservations() {
+  try {
+    const res = await fetch(`${API_BASE}/reservations`, { headers: { ...getAuthHeader() } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.reservations || [];
+  } catch (err) {
+    return null;
+  }
+}
+
+export async function apiDeleteReservation(id) {
+  try {
+    const res = await fetch(`${API_BASE}/reservations/${id}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeader() },
+    });
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
 // --- SUBASTAS (LOTES) ---

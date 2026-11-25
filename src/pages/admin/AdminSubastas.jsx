@@ -1111,7 +1111,6 @@ export default function AdminSubastas({ onNotify }) {
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-[var(--ink-2)] border-b border-[var(--line-soft)] text-[var(--gold)] font-mono uppercase tracking-wider text-[11px]">
-                        <th className="p-3 w-10 text-center">#</th>
                         <th className="p-3">Nombre y Apellido</th>
                         <th className="p-3">DNI</th>
                         <th className="p-3">Contacto</th>
@@ -1123,9 +1122,6 @@ export default function AdminSubastas({ onNotify }) {
                     <tbody className="divide-y divide-[var(--line-soft)]">
                       {accreditationsList.map((item, idx) => (
                         <tr key={item.id || idx} className="hover:bg-[var(--ink-2)]/50 transition-colors align-top">
-                          <td className="p-3 font-mono text-[var(--ivory-dim)] text-center">
-                            {String(idx + 1).padStart(2, '0')}
-                          </td>
                           <td className="p-3 font-medium text-[var(--ivory)]">
                             {item.name}
                           </td>

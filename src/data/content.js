@@ -276,3 +276,16 @@ export const HERO_SLIDES = [
   { src: IMAGES.heroSubasta, cap: 'Subasta en vivo bajo martillo' },
   { src: IMAGES.heroConcurrencia, cap: 'Gala inaugural y concurrencia' },
 ];
+
+/**
+ * Contenido por defecto de la página de Inicio (editable desde el panel)
+ */
+export const HOME_DEFAULTS = {
+  heroTitle: 'Autenticidad que trasciende el tiempo',
+  heroSlides: HERO_SLIDES.map((s) => s.src),
+  artistsTitle: 'Artistas de la colección',
+  artistsIntro:
+    'Grandes maestros y creadores contemporáneos que forman parte de nuestro acervo y subastas. Pasá el mouse sobre cualquier artista para pausar y ver su obra, o hacé clic para abrir su ficha completa.',
+  servicesTitle: 'Áreas Insignia',
+  services: SERVICES.map((s) => ({ title: s.title, text: s.text, image: s.image, alt: s.alt })),
+};

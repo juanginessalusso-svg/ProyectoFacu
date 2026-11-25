@@ -78,6 +78,19 @@ db.exec(`
     auction_deadline TEXT,
     created_at TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS reservations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id TEXT,
+    event_title TEXT,
+    event_date TEXT,
+    name TEXT,
+    phone TEXT,
+    email TEXT,
+    guests INTEGER,
+    notes TEXT,
+    created_at TEXT
+  );
 `);
 
 // Migración retrocompatible si la tabla bids o accreditations ya existían sin nuevas columnas
@@ -339,7 +352,13 @@ app.get('/api/data', (req, res) => {
       try { galleryIntro = JSON.parse(galleryIntroRow.value); } catch (_) { galleryIntro = null; }
     }
 
-    res.json({ lots, events, gallery, deadline, galleryIntro });
+    const homeRow = db.prepare('SELECT value FROM config WHERE key = ?').get('home');
+    let home = null;
+    if (homeRow) {
+      try { home = JSON.parse(homeRow.value); } catch (_) { home = null; }
+    }
+
+    res.json({ lots, events, gallery, deadline, galleryIntro, home });
   } catch (err) {
     console.error('Error al consultar datos:', err);
     res.status(500).json({ error: 'Error al obtener datos' });
@@ -582,6 +601,113 @@ app.get('/api/bids', requireAuth, (req, res) => {
     res.json({ bids });
   } catch (err) {
     res.status(500).json({ error: 'Error al consultar ofertas' });
+  }
+});
+
+// Guardar contenido editable de la página de Inicio (Protegido)
+app.put('/api/home', requireAuth, (req, res) => {
+  const b = req.body || {};
+  const str = (v, max) => String(v == null ? '' : v).slice(0, max);
+  const home = {
+    heroTitle: str(b.heroTitle, 300),
+    heroSlides: Array.isArray(b.heroSlides)
+      ? b.heroSlides.slice(0, 12).map((x) => str(x, 500)).filter(Boolean)
+      : [],
+    artistsTitle: str(b.artistsTitle, 200),
+    artistsIntro: str(b.artistsIntro, 2000),
+    servicesTitle: str(b.servicesTitle, 200),
+    services: Array.isArray(b.services)
+      ? b.services.slice(0, 12).map((x) => ({
+          title: str(x && x.title, 120),
+          text: str(x && x.text, 600),
+          image: str(x && x.image, 500),
+        }))
+      : [],
+  };
+  try {
+    db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run('home', JSON.stringify(home));
+    res.json({ success: true, home });
+  } catch (err) {
+    console.error('Error guardando Inicio:', err);
+    res.status(500).json({ error: 'Error guardando el contenido de Inicio' });
+  }
+});
+
+// Registrar solicitud de reserva de asistencia a un evento (Público)
+const reservationAttempts = new Map();
+app.post('/api/reservations', (req, res) => {
+  const ip = getClientIp(req);
+  const now = Date.now();
+  const info = reservationAttempts.get(ip) || { count: 0, firstAttempt: now };
+  if (now - info.firstAttempt > 60000) {
+    info.count = 1;
+    info.firstAttempt = now;
+  } else {
+    info.count += 1;
+    if (info.count > 8) {
+      return res.status(429).json({ error: 'Demasiadas solicitudes. Esperá un minuto antes de reintentar.' });
+    }
+  }
+  reservationAttempts.set(ip, info);
+
+  try {
+    const { eventId, eventTitle, eventDate, name, phone, email, guests, notes } = req.body || {};
+    const safeName = String(name || '').trim().slice(0, 100);
+    const safePhone = String(phone || '').trim().slice(0, 50);
+    const safeEmail = String(email || '').trim().slice(0, 120);
+    if (!safeName || !safePhone) {
+      return res.status(400).json({ error: 'Nombre y teléfono son obligatorios' });
+    }
+    if (safeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+      return res.status(400).json({ error: 'El correo electrónico no tiene un formato válido' });
+    }
+    let safeGuests = parseInt(guests, 10);
+    if (isNaN(safeGuests) || safeGuests < 1) safeGuests = 1;
+    if (safeGuests > 20) safeGuests = 20;
+
+    db.prepare(`
+      INSERT INTO reservations (event_id, event_title, event_date, name, phone, email, guests, notes, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      String(eventId || '').slice(0, 80),
+      String(eventTitle || '').slice(0, 200),
+      String(eventDate || '').slice(0, 80),
+      safeName,
+      safePhone,
+      safeEmail,
+      safeGuests,
+      String(notes || '').trim().slice(0, 500),
+      new Date().toISOString()
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error al registrar reserva:', err);
+    res.status(500).json({ error: 'Error al registrar la reserva' });
+  }
+});
+
+// Ver solicitudes de reserva (Protegido para el Admin)
+app.get('/api/reservations', requireAuth, (req, res) => {
+  try {
+    const reservations = db.prepare('SELECT * FROM reservations ORDER BY id DESC').all();
+    res.json({ reservations });
+  } catch (err) {
+    console.error('Error al listar reservas:', err);
+    res.status(500).json({ error: 'Error al obtener reservas' });
+  }
+});
+
+// Eliminar una solicitud de reserva (Protegido para el Admin)
+app.delete('/api/reservations/:id', requireAuth, (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+    const r = db.prepare('DELETE FROM reservations WHERE id = ?').run(id);
+    if (r.changes === 0) return res.status(404).json({ error: 'Reserva no encontrada' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error al eliminar reserva:', err);
+    res.status(500).json({ error: 'Error al eliminar la reserva' });
   }
 });
 
