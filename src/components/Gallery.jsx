@@ -39,7 +39,6 @@ function GalleryRowItem({ photo, index, onOpen }) {
 
   const isEvenRow = index % 2 === 1; // en pares la imagen va a la derecha en desktop
   const ratio = ASPECT_RATIOS[index % ASPECT_RATIOS.length];
-  const lotNumberStr = String(index + 1).padStart(2, '0');
 
   // Efecto Cortina exclusivo: la foto se devela como telón y el texto se desliza
   const figAnimClass = inView
@@ -73,7 +72,6 @@ function GalleryRowItem({ photo, index, onOpen }) {
         className={cx('flex flex-col justify-center', textAnimClass)}
         style={{ animationDelay: inView ? '0.15s' : undefined }}
       >
-        <div className="m3g-n" aria-hidden="true">{lotNumberStr}</div>
         <h3 className="m3g-title">{photo.cap}</h3>
       </div>
     </article>

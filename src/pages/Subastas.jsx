@@ -628,7 +628,6 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
               <div className="m3-grid">
                 {filteredLots.map((lot) => {
                   const globalIdx = lots.findIndex((l) => l.id === lot.id);
-                  const lotNumberStr = String(lot.id).padStart(2, '0');
                   const highestBid = preoffersByLot[lot.id]?.highestBid;
 
                   return (
@@ -682,8 +681,6 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
                               <dd>{lot.dimensions}</dd>
                             </>
                           )}
-                          <dt>Lote</dt>
-                          <dd>#{lotNumberStr}</dd>
                         </dl>
 
                         <div className="flex-1 min-h-[16px]"></div>
@@ -1006,10 +1003,10 @@ Notificación generada desde el catálogo de Subastas Insignia.`;
               </div>
               <p className="eyebrow !text-[var(--gold-hi)]">Registro Oficial</p>
               <h3 className="font-serif text-2xl md:text-3xl text-[var(--ivory)] font-medium mt-1">
-                Acreditación de Postulante
+                Acreditación
               </h3>
               <p className="text-xs text-[var(--ivory-dim)] max-w-md mx-auto leading-relaxed mt-2">
-                Para ingresar a la sección de preoferta y participar en las preofertas de la colección inaugural, por favor completá tus datos de contacto e identificación.
+                Para ingresar a la sección y participar en las preofertas de la colección inaugural, completá tus datos de contacto e identificación.
               </p>
             </div>
 

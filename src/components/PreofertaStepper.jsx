@@ -13,7 +13,6 @@ import { getDeadline, formatDeadlineText } from '../lib/storage';
 
 const BASE_STEPPER_STEPS = [
   {
-    n: '01',
     label: 'Elegir obra',
     title: 'Seleccioná la obra',
     description:
@@ -21,7 +20,6 @@ const BASE_STEPPER_STEPS = [
     icon: Palette,
   },
   {
-    n: '02',
     label: 'Preoferta',
     title: 'Hacé tu preoferta',
     description:
@@ -29,7 +27,6 @@ const BASE_STEPPER_STEPS = [
     icon: MousePointerClick,
   },
   {
-    n: '03',
     label: 'Tus datos',
     title: 'Completá tus datos',
     description:
@@ -38,7 +35,6 @@ const BASE_STEPPER_STEPS = [
     tags: ['Nombre completo', 'DNI', 'Teléfono', 'E-mail'],
   },
   {
-    n: '04',
     label: 'Monto',
     title: 'Ofertá un monto mayor a la base',
     description:
@@ -46,22 +42,24 @@ const BASE_STEPPER_STEPS = [
     icon: TrendingUp,
   },
   {
-    n: '05',
     label: 'Seña',
     title: 'Abonás el 30% de seña',
     description:
       'Si sos el adjudicado provisorio al cierre, abonás el 30% del total de tu preoferta como seña.',
     icon: Clock,
     highlight: 'Plazo: 72 horas hábiles previas al día del remate oficial.',
+    notes: [
+      'La seña no se devuelve una vez enviada, aunque el cliente tenga un problema o no pueda concretar la compra.',
+      'El envío corre por cuenta del comprador.',
+    ],
   },
   {
-    n: '06',
     label: 'Comprobante',
     title: 'Enviá el comprobante',
     description:
       'Una vez transferida la seña, mandá el comprobante por WhatsApp a la línea oficial con estos datos:',
     icon: FileCheck,
-    tags: ['Nombre de la obra', 'Autor', 'Número de lote'],
+    tags: ['Nombre de la obra', 'Autor', 'Lote'],
   },
 ];
 
@@ -102,12 +100,12 @@ export default function PreofertaStepper() {
           ¿Cómo funciona el sistema de <em>preoferta</em>?
         </h2>
         <p className="mt-4 md:mt-4.5 text-lg md:text-[20px] leading-relaxed md:leading-[1.6] text-[var(--ivory-dim)]">
-          Seguí estos 6 pasos para postular tu oferta antes del remate en sala, con total transparencia y el respaldo de{' '}
+          Seguí estos pasos para postular tu oferta antes del remate en sala, con total transparencia y el respaldo de{' '}
           <strong className="font-semibold text-[var(--ivory)]">Insignia Casa de Arte</strong>.
         </p>
       </div>
 
-      {/* Barra de progreso con 6 nodos */}
+      {/* Barra de progreso */}
       <div className="relative mt-10 md:mt-12">
         {/* Línea de fondo */}
         <div
@@ -128,11 +126,11 @@ export default function PreofertaStepper() {
 
             return (
               <button
-                key={s.n}
+                key={s.label}
                 type="button"
                 onClick={() => setCurrentStep(idx)}
                 aria-current={isAct ? 'step' : 'false'}
-                aria-label={`Paso ${idx + 1}: ${s.label}`}
+                aria-label={`Paso: ${s.label}`}
                 className="flex flex-col items-center gap-3 p-0 m-0 border-0 bg-transparent cursor-pointer font-inherit text-inherit group focus-visible:outline-2 focus-visible:outline-[#e2d7c0] focus-visible:outline-offset-2"
               >
                 <span
@@ -147,7 +145,7 @@ export default function PreofertaStepper() {
                     animation: isAct ? 'dcPulse 1.8s ease-out infinite' : 'none',
                   }}
                 >
-                  {isDone ? '✓' : idx + 1}
+                  {isDone ? '✓' : <s.icon className="w-[18px] h-[18px]" strokeWidth={1.6} />}
                 </span>
                 <span
                   className={`dc-lbl text-sm tracking-[0.06em] transition-colors duration-300 ${
@@ -168,14 +166,8 @@ export default function PreofertaStepper() {
           key={currentStep}
           className="w-full flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-14 lg:gap-16"
         >
-          {/* Número e ícono */}
-          <div className="shrink-0 flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-4.5 w-full md:w-[200px]">
-            <span
-              className="font-serif font-light text-[90px] sm:text-[130px] md:text-[168px] leading-[0.8] text-[var(--ivory)] select-none"
-              style={{ animation: 'dcPop .6s cubic-bezier(.2,.8,.2,1) both' }}
-            >
-              {stepData.n}
-            </span>
+          {/* Ícono */}
+          <div className="shrink-0 flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-4.5 w-full md:w-[120px]">
             <span
               className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full border-[1.5px] border-white/20 flex items-center justify-center text-[var(--ivory)] shrink-0 bg-white/5"
               style={{ animation: 'dcPop .6s .12s cubic-bezier(.2,.8,.2,1) both' }}
@@ -197,7 +189,7 @@ export default function PreofertaStepper() {
               {stepData.description}
             </p>
 
-            {/* Plazos destacados (Pasos 2 y 5) */}
+            {/* Plazos destacados */}
             {stepData.highlight && (
               <div
                 className="mt-6 md:mt-7 inline-flex items-center gap-3 border-[1.5px] border-white/20 bg-white/10 px-4 py-3 md:px-5.5 md:py-3.5 text-base sm:text-lg font-semibold text-[var(--ivory)]"
@@ -208,7 +200,21 @@ export default function PreofertaStepper() {
               </div>
             )}
 
-            {/* Etiquetas (Pasos 3 y 6) */}
+            {/* Aclaraciones importantes */}
+            {stepData.notes && (
+              <ul className="mt-6 md:mt-7 space-y-3 max-w-[640px] list-none p-0">
+                {stepData.notes.map((note) => (
+                  <li
+                    key={note}
+                    className="border-l-2 border-[var(--gold)] pl-4 text-base sm:text-lg leading-relaxed text-[var(--ivory)]"
+                  >
+                    {note}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Etiquetas */}
             {stepData.tags && (
               <div className="mt-6 md:mt-7 flex flex-wrap gap-2.5 sm:gap-3">
                 {stepData.tags.map((tag, idx) => (
@@ -231,8 +237,8 @@ export default function PreofertaStepper() {
 
       {/* Controles de navegación y estado */}
       <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-5">
-        <p className="font-mono text-sm font-semibold tracking-[0.14em] text-[var(--ivory-dim)] m-0 text-center sm:text-left">
-          PASO {currentStep + 1} DE 6
+        <p className="font-mono text-sm tracking-[0.14em] text-[var(--ivory-dim)] m-0 text-center sm:text-left">
+          {stepData.label}
         </p>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">

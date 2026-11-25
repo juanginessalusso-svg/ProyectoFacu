@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ARTISTS } from '../data/content';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { getHome } from '../lib/storage';
 
 const getArtistNameParts = (fullName) => {
   if (fullName === 'Alicia Díaz Rinaldi') {
@@ -20,10 +21,18 @@ export default function Artists() {
   const modalPanelRef = useRef(null);
 
   const activeArtist = activeArtistIndex !== null ? ARTISTS[activeArtistIndex] : null;
+  const [home, setHome] = useState(() => getHome());
+  useEffect(() => {
+    const onChange = () => setHome(getHome());
+    window.addEventListener('insignia-data-change', onChange);
+    return () => window.removeEventListener('insignia-data-change', onChange);
+  }, []);
+
   const works = activeArtist
     ? (activeArtist.works && activeArtist.works.length > 0
         ? activeArtist.works
-        : [activeArtist.artwork])
+        : [activeArtist.artwork]
+      ).filter(Boolean)
     : [];
   const currentWork = works[activeWorkIndex] || works[0];
   const hasMultipleWorks = works.length > 1;
@@ -101,13 +110,8 @@ export default function Artists() {
           <div className="artistas__eyebrow">
             <span>REPARTO</span>
           </div>
-          <h2 className="artistas__title">
-            Artistas de la <em>colección</em>
-          </h2>
-          <p className="artistas__intro">
-            Grandes maestros y creadores contemporáneos que forman parte de nuestro acervo y subastas.
-            Pasá el mouse sobre cualquier artista para pausar y ver su obra, o hacé clic para abrir su ficha completa.
-          </p>
+          <h2 className="artistas__title">{home.artistsTitle}</h2>
+          <p className="artistas__intro">{home.artistsIntro}</p>
         </div>
 
         {/* Carrusel Marquee infinito (se desplaza solo de forma continua y se pausa al hacer hover) */}
@@ -120,7 +124,8 @@ export default function Artists() {
                 artist.works && artist.works.length > 0
                   ? artist.works[0]
                   : artist.artwork;
-              const artworkImg = primaryWork?.img || primaryWork?.src;
+              const artworkImg = primaryWork ? primaryWork.img || primaryWork.src : artist.portrait;
+              const previewTitle = primaryWork ? primaryWork.title : artist.name;
 
               return (
                 <div
@@ -154,7 +159,7 @@ export default function Artists() {
                         {artworkImg ? (
                           <img
                             src={artworkImg}
-                            alt={`${primaryWork?.title || artist.name}`}
+                            alt={previewTitle}
                             className="art-box__artwork-img"
                             loading="lazy"
                           />
@@ -163,9 +168,7 @@ export default function Artists() {
                         )}
                       </div>
                       <div className="art-box__preview-caption">
-                        <span className="art-box__preview-title">
-                          {primaryWork?.title || artist.name}
-                        </span>
+                        <span className="art-box__preview-title">{previewTitle}</span>
                       </div>
                     </div>
                   </div>
@@ -219,7 +222,7 @@ export default function Artists() {
             </div>
 
             {/* Contenido en 2 columnas: Artista & Obra */}
-            <div className="art-modal-body">
+            <div className={`art-modal-body${currentWork ? '' : ' art-modal-body--solo'}`}>
               {/* Columna Izquierda: Información y foto del Artista */}
               <div className="art-modal-col art-modal-col--bio">
                 <div className="art-modal-portrait-wrap">
@@ -247,14 +250,10 @@ export default function Artists() {
               </div>
 
               {/* Columna Derecha: Obra Destacada de la Colección */}
+              {currentWork && (
               <div className="art-modal-col art-modal-col--work">
                 <div className="art-modal-work-badge">
                   <span>OBRA DESTACADA EN SALA</span>
-                  {hasMultipleWorks && (
-                    <span className="art-modal-work-count">
-                      {activeWorkIndex + 1} de {works.length}
-                    </span>
-                  )}
                 </div>
 
                 <div className="art-modal-work-frame">
@@ -306,6 +305,7 @@ export default function Artists() {
                   )}
                 </div>
               </div>
+              )}
             </div>
           </div>
         </div>

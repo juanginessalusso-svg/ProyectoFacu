@@ -4,6 +4,8 @@ import {
   Gavel,
   Calendar,
   Images,
+  Home,
+  CalendarCheck,
   Database,
   Lock,
   Unlock,
@@ -22,6 +24,8 @@ import {
 import AdminSubastas from './admin/AdminSubastas';
 import AdminEventos from './admin/AdminEventos';
 import AdminGaleria from './admin/AdminGaleria';
+import AdminInicio from './admin/AdminInicio';
+import AdminReservas from './admin/AdminReservas';
 import BrandLogo, { InsigniaWordmark } from '../components/BrandLogo';
 import {
   resetAllToDefaults,
@@ -49,8 +53,8 @@ export default function Admin() {
   const [passChangeStatus, setPassChangeStatus] = useState(null);
   const [passLoading, setPassLoading] = useState(false);
 
-  // Pestaña activa: 'subastas' | 'eventos' | 'galeria' | 'backup'
-  const [activeTab, setActiveTab] = useState('subastas');
+  // Pestaña activa: 'inicio' | 'subastas' | 'eventos' | 'reservas' | 'galeria' | 'backup'
+  const [activeTab, setActiveTab] = useState('inicio');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Mensaje flotante de notificación (toast)
@@ -306,6 +310,36 @@ export default function Admin() {
 
           <button
             onClick={() => {
+              setActiveTab('inicio');
+              setMobileMenuOpen(false);
+            }}
+            className={`w-full p-3 rounded-xl text-left transition-all flex items-center gap-3.5 ${
+              activeTab === 'inicio'
+                ? 'bg-[#5A5A50] text-white font-semibold shadow-lg shadow-black/40 ring-1 ring-white/20'
+                : 'text-zinc-300 hover:text-white hover:bg-white/5 border border-transparent'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-lg shrink-0 ${
+                activeTab === 'inicio' ? 'bg-white/20 text-white' : 'bg-white/5 text-zinc-400'
+              }`}
+            >
+              <Home size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs uppercase tracking-wider font-semibold">Inicio</div>
+              <div
+                className={`text-[11px] tracking-normal ${
+                  activeTab === 'inicio' ? 'text-zinc-200' : 'text-zinc-500'
+                }`}
+              >
+                Portada, artistas y áreas
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
               setActiveTab('subastas');
               setMobileMenuOpen(false);
             }}
@@ -325,7 +359,7 @@ export default function Admin() {
               <Gavel size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs uppercase tracking-wider font-semibold">1. Subastas & Obras</div>
+              <div className="text-xs uppercase tracking-wider font-semibold">Subastas & Obras</div>
               <div
                 className={`text-[11px] tracking-normal ${
                   activeTab === 'subastas' ? 'text-zinc-200' : 'text-zinc-500'
@@ -357,13 +391,43 @@ export default function Admin() {
               <Calendar size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs uppercase tracking-wider font-semibold">2. Eventos & Muestras</div>
+              <div className="text-xs uppercase tracking-wider font-semibold">Eventos & Muestras</div>
               <div
                 className={`text-[11px] tracking-normal ${
                   activeTab === 'eventos' ? 'text-zinc-200' : 'text-zinc-500'
                 }`}
               >
                 Exposiciones y fechas
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('reservas');
+              setMobileMenuOpen(false);
+            }}
+            className={`w-full p-3 rounded-xl text-left transition-all flex items-center gap-3.5 ${
+              activeTab === 'reservas'
+                ? 'bg-[#5A5A50] text-white font-semibold shadow-lg shadow-black/40 ring-1 ring-white/20'
+                : 'text-zinc-300 hover:text-white hover:bg-white/5 border border-transparent'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-lg shrink-0 ${
+                activeTab === 'reservas' ? 'bg-white/20 text-white' : 'bg-white/5 text-zinc-400'
+              }`}
+            >
+              <CalendarCheck size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs uppercase tracking-wider font-semibold">Reservas</div>
+              <div
+                className={`text-[11px] tracking-normal ${
+                  activeTab === 'reservas' ? 'text-zinc-200' : 'text-zinc-500'
+                }`}
+              >
+                Solicitudes para eventos
               </div>
             </div>
           </button>
@@ -389,7 +453,7 @@ export default function Admin() {
               <Images size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs uppercase tracking-wider font-semibold">3. Galería (Fotos)</div>
+              <div className="text-xs uppercase tracking-wider font-semibold">Galería (Fotos)</div>
               <div
                 className={`text-[11px] tracking-normal ${
                   activeTab === 'galeria' ? 'text-zinc-200' : 'text-zinc-500'
@@ -448,8 +512,10 @@ export default function Admin() {
       {/* Contenido Principal (Derecha) */}
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
         <div className="max-w-6xl mx-auto">
+          {activeTab === 'inicio' && <AdminInicio onNotify={notify} />}
           {activeTab === 'subastas' && <AdminSubastas onNotify={notify} />}
           {activeTab === 'eventos' && <AdminEventos onNotify={notify} />}
+          {activeTab === 'reservas' && <AdminReservas onNotify={notify} />}
           {activeTab === 'galeria' && <AdminGaleria onNotify={notify} />}
 
           {activeTab === 'backup' && (

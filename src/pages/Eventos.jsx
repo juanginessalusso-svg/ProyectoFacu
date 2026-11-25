@@ -3,6 +3,7 @@ import { Clock, MapPin, ArrowRight, Images, Calendar, Sparkles, CheckCircle2 } f
 import { getEvents } from '../lib/storage';
 import { reduced } from '../lib/format';
 import Lightbox from '../components/Lightbox';
+import ReservationModal from '../components/ReservationModal';
 
 function EventPhotoCarousel({ event, onOpenLightbox }) {
   const images = useMemo(() => {
@@ -141,6 +142,7 @@ export default function Eventos() {
   const [events, setEvents] = useState(() => getEvents());
   const [filter, setFilter] = useState('all'); // 'all' | 'subastas' | 'muestras'
   const [lightboxData, setLightboxData] = useState(null); // { items: [], index: 0 }
+  const [reserveEvent, setReserveEvent] = useState(null);
 
   useEffect(() => {
     document.title = 'Eventos & Exposiciones · Memoria Fotográfica & Próximas Fechas | Subastas Insignia';
@@ -298,9 +300,6 @@ export default function Eventos() {
             ) : (
               <div className="space-y-12 mt-14">
                 {upcomingEvents.map((uev, uIdx) => {
-                  const dayMatch = uev.date ? uev.date.match(/\d+/) : null;
-                  const ghostNumber = dayMatch ? dayMatch[0].padStart(2, '0') : String(uIdx + 1).padStart(2, '0');
-
                   return (
                     <AnimatedCard
                       key={uev.id || uIdx}
@@ -339,20 +338,13 @@ export default function Eventos() {
 
                       {/* Título Principal con Número Fantasma en fondo */}
                       <div className="relative overflow-hidden px-6 py-12 md:px-12 md:py-16">
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none select-none absolute right-6 -top-7 font-display font-medium text-[clamp(160px,22vw,320px)] leading-none text-white/[0.07]"
-                        >
-                          {ghostNumber}
-                        </div>
-
                         <h3 className="relative z-10 m-0 max-w-[860px] font-display font-medium text-[clamp(36px,5.5vw,78px)] leading-[1.02] tracking-tight text-[#f4f1ea]">
                           {uev.title.includes('&') ? (
                             (() => {
                               const [p1, ...p2] = uev.title.split('&');
                               return (
                                 <>
-                                  {p1.trim()} {'&'} <em className="font-normal italic">{p2.join('&').trim()}</em>
+                                  {p1.trim()} {'&'} {p2.join('&').trim()}
                                 </>
                               );
                             })()
@@ -370,19 +362,16 @@ export default function Eventos() {
                           </p>
                         )}
 
-                        <a
-                          href={`https://wa.me/5493584852932?text=${encodeURIComponent(
-                            `Hola Subastas Insignia, deseo consultar y reservar mi lugar para el evento: "${uev.title}" (${uev.date}${uev.time ? ` a las ${uev.time}` : ''}).`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => setReserveEvent(uev)}
                           className="w-full sm:w-auto inline-flex items-center justify-center gap-4 min-h-[56px] px-8 md:px-9 bg-[#1c1b17] border border-white/15 text-white text-[13px] font-semibold tracking-[0.24em] uppercase transition-all duration-200 hover:bg-black hover:border-white/30 focus-visible:outline-2 focus-visible:outline-white shrink-0 group shadow-md"
                         >
                           <span>Reservar asistencia</span>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-hover:translate-x-1 shrink-0">
                             <path d="M4 12h16M14 6l6 6-6 6"></path>
                           </svg>
-                        </a>
+                        </button>
                       </div>
                     </AnimatedCard>
                   );
@@ -392,6 +381,10 @@ export default function Eventos() {
           </div>
         </div>
       </section>
+
+      {reserveEvent && (
+        <ReservationModal event={reserveEvent} onClose={() => setReserveEvent(null)} />
+      )}
 
       {/* Lightbox para ampliar fotografías del evento */}
       {lightboxData && (

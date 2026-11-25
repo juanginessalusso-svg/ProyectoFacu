@@ -1359,3 +1359,29 @@ textarea::placeholder {
   .rise { opacity: 1; }
   .grain { animation: none; }
 }
+
+/* =====================================================================
+   TIPOGRAFÍA ÚNICA: Montserrat Light (300), recta, sin cursivas ni negritas.
+   Aplica a todo el sitio: títulos, textos, botones y panel administrativo.
+   ===================================================================== */
+html,
+body,
+*,
+*::before,
+*::after {
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+  font-weight: 300 !important;
+  font-style: normal !important;
+  font-synthesis: none;
+}
+b, strong, em, i, h1, h2, h3, h4, h5, h6, th, label, button, legend {
+  font-weight: 300 !important;
+  font-style: normal !important;
+}
+
+/* Ficha de artista sin obra destacada: una sola columna */
+.art-modal-body--solo { grid-template-columns: 1fr; }
+.art-modal-body--solo .art-modal-col--bio { border-right: none; }
+
+/* Áreas Insignia: tarjetas informativas (sin enlace, sin numeración) */
+.m2-panel { justify-content: flex-end; cursor: default; }

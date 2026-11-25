@@ -42,20 +42,7 @@ export const ARTISTS = [
     bio: 'Gran maestro de la pintura y la acuarela argentina de trascendencia internacional. Su obra transita una figuración poética y luminosa, con un virtuosismo técnico inconfundible que marcó la historia del arte nacional.',
     portrait: '/img/artista-roux.jpg',
     portraitPosition: 'center top',
-    works: [
-      {
-        title: 'San Martín',
-        technique: 'Acuarela',
-        img: '/img/obra-roux.jpg',
-        src: '/img/obra-roux.jpg',
-        desc: 'Célebre retrato al temple y acuarela del prócer argentino, firmado Roux 2000.',
-      },
-    ],
-    artwork: {
-      src: '/img/obra-roux.jpg',
-      title: 'San Martín (Acuarela)',
-      desc: 'Célebre retrato al temple y acuarela del prócer argentino, firmado Roux 2000.',
-    },
+    works: [],
   },
   {
     id: 'otegui',
@@ -276,3 +263,16 @@ export const HERO_SLIDES = [
   { src: IMAGES.heroSubasta, cap: 'Subasta en vivo bajo martillo' },
   { src: IMAGES.heroConcurrencia, cap: 'Gala inaugural y concurrencia' },
 ];
+
+/**
+ * Contenido por defecto de la página de Inicio (editable desde el panel)
+ */
+export const HOME_DEFAULTS = {
+  heroTitle: 'Autenticidad que trasciende el tiempo',
+  heroSlides: HERO_SLIDES.map((s) => s.src),
+  artistsTitle: 'Artistas de la colección',
+  artistsIntro:
+    'Grandes maestros y creadores contemporáneos que forman parte de nuestro acervo y subastas. Pasá el mouse sobre cualquier artista para pausar y ver su obra, o hacé clic para abrir su ficha completa.',
+  servicesTitle: 'Áreas Insignia',
+  services: SERVICES.map((s) => ({ title: s.title, text: s.text, image: s.image, alt: s.alt })),
+};
