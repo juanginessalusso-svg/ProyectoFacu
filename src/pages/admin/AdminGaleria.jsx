@@ -6,7 +6,8 @@ import {
   Trash2,
   Image as ImageIcon,
   Upload,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import {
   getGalleryPhotos,
@@ -20,9 +21,10 @@ import {
 export default function AdminGaleria({ onNotify }) {
   const [photos, setPhotos] = useState([]);
   const [editingPhoto, setEditingPhoto] = useState(null);
-  const [photoForm, setPhotoForm] = useState({ id: '', src: '', cap: '', cls: 'lg:col-span-6', h: 'h-[320px] md:h-[400px]' });
+  const [photoForm, setPhotoForm] = useState({ id: '', src: '', cap: '', text: '', cls: 'lg:col-span-6', h: 'h-[320px] md:h-[400px]' });
   const [photoPreview, setPhotoPreview] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isUploadingIntroPhoto, setIsUploadingIntroPhoto] = useState(false);
   const [introForm, setIntroForm] = useState(() => getGalleryIntro());
   const [introDirty, setIntroDirty] = useState(false);
   const [isSavingIntro, setIsSavingIntro] = useState(false);
@@ -53,18 +55,41 @@ export default function AdminGaleria({ onNotify }) {
       setIsSavingIntro(true);
       await saveGalleryIntro(introForm);
       setIntroDirty(false);
-      onNotify('Texto de la galería guardado');
+      onNotify('Cabecera e información de la galería guardadas');
     } catch (err) {
-      alert('No se pudo guardar el texto en el servidor: ' + err.message);
+      alert('No se pudo guardar la información en el servidor: ' + err.message);
     } finally {
       setIsSavingIntro(false);
     }
+  };
+
+  const handleIntroPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingIntroPhoto(true);
+      const uploadedUrl = await apiUploadImage(file);
+      setIntroForm((prev) => ({ ...prev, image: uploadedUrl }));
+      setIntroDirty(true);
+      onNotify('Foto de cabecera subida correctamente');
+    } catch (err) {
+      alert('Error al procesar la foto de cabecera: ' + err.message);
+    } finally {
+      setIsUploadingIntroPhoto(false);
+    }
+  };
+
+  const handleRemoveIntroPhoto = () => {
+    setIntroForm((prev) => ({ ...prev, image: '' }));
+    setIntroDirty(true);
   };
 
   const handleOpenEditPhoto = (photo, index) => {
     const p = {
       ...photo,
       id: photo.id || `gal-${index + 1}`,
+      cap: photo.cap || '',
+      text: photo.text || photo.desc || photo.description || '',
       cls: photo.cls || 'lg:col-span-6',
       h: photo.h || 'h-[320px] md:h-[400px]',
     };
@@ -78,6 +103,7 @@ export default function AdminGaleria({ onNotify }) {
       id: `gal-${Date.now()}`,
       src: '',
       cap: '',
+      text: '',
       cls: 'lg:col-span-6',
       h: 'h-[320px] md:h-[400px]',
     });
@@ -100,25 +126,33 @@ export default function AdminGaleria({ onNotify }) {
     }
   };
 
+  const handleRemovePhotoSrc = () => {
+    setPhotoForm((prev) => ({ ...prev, src: '' }));
+    setPhotoPreview('');
+  };
+
   const handleSavePhoto = (e) => {
     e.preventDefault();
-    if (!photoForm.src && !photoPreview) {
-      alert('Por favor selecciona una imagen.');
+    const finalSrc = photoForm.src || photoPreview || '';
+    if (!photoForm.cap?.trim() && !photoForm.text?.trim() && !finalSrc) {
+      alert('Por favor ingresa al menos un título o un texto para la publicación.');
       return;
     }
 
     const item = {
       ...photoForm,
-      src: photoForm.src || photoPreview,
+      src: finalSrc,
+      text: photoForm.text || '',
+      cap: photoForm.cap || '',
     };
 
     let updated = [];
     if (editingPhoto === 'new') {
       updated = [...photos, item];
-      onNotify('Fotografía agregada a la galería');
+      onNotify('Elemento agregado a la galería');
     } else {
       updated = photos.map((p, idx) => (idx === editingPhoto ? item : p));
-      onNotify('Fotografía actualizada en la galería');
+      onNotify('Elemento actualizado en la galería');
     }
 
     saveGalleryPhotos(updated);
@@ -157,24 +191,25 @@ export default function AdminGaleria({ onNotify }) {
         </button>
       </div>
 
-      {/* Texto introductorio que aparece al inicio de la página Galería */}
+      {/* Texto introductorio y foto de portada que aparecen al inicio de la página Galería */}
       <form
         onSubmit={handleSaveIntro}
-        className="bg-[var(--ink-2)]/40 p-5 rounded-lg border border-[var(--line-soft)] space-y-3 text-sm"
+        className="bg-[var(--ink-2)]/40 p-5 rounded-lg border border-[var(--line-soft)] space-y-4 text-sm"
       >
         <div>
-          <h3 className="text-base font-serif text-[var(--ivory)]">Información al inicio de la Galería</h3>
+          <h3 className="text-base font-serif text-[var(--ivory)]">Información y Portada al inicio de la Galería</h3>
           <p className="text-xs text-[var(--ivory-dim)] mt-1">
-            Se muestra debajo del título "Galería Insignia". Dejalo vacío para no mostrar nada.
+            Se muestra al comienzo de la página 'Galería'. Puedes configurar el subtítulo, el texto informativo y de manera opcional una fotografía debajo del título principal.
           </p>
         </div>
+
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
             Subtítulo (opcional)
           </label>
           <input
             type="text"
-            value={introForm.title}
+            value={introForm.title || ''}
             maxLength={200}
             onChange={(e) => {
               setIntroForm({ ...introForm, title: e.target.value });
@@ -184,13 +219,14 @@ export default function AdminGaleria({ onNotify }) {
             className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none"
           />
         </div>
+
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
-            Texto
+            Texto informativo
           </label>
           <textarea
-            rows={5}
-            value={introForm.text}
+            rows={4}
+            value={introForm.text || ''}
             maxLength={5000}
             onChange={(e) => {
               setIntroForm({ ...introForm, text: e.target.value });
@@ -200,13 +236,83 @@ export default function AdminGaleria({ onNotify }) {
             className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none resize-y"
           />
         </div>
-        <div className="flex justify-end">
+
+        {/* Sección: Foto opcional debajo del título principal */}
+        <div className="pt-3 border-t border-[var(--line-soft)] space-y-2.5">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)]">
+              Foto debajo del título grande (opcional)
+            </label>
+            {introForm.image && (
+              <button
+                type="button"
+                onClick={handleRemoveIntroPhoto}
+                className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 transition-colors"
+                title="Quitar foto de cabecera"
+              >
+                <Trash2 size={13} />
+                Quitar foto
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-[var(--ivory-dim)]/70">
+            Aparece en la columna izquierda debajo de "Galería Insignia". Si no se asigna foto, el título ocupará su espacio limpio.
+          </p>
+
+          {introForm.image ? (
+            <div className="relative aspect-[16/9] sm:aspect-[21/9] max-h-48 rounded-lg overflow-hidden border border-[var(--line-soft)] bg-black/20 group">
+              <img
+                src={introForm.image}
+                alt="Vista previa cabecera"
+                className="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveIntroPhoto}
+                className="absolute top-2 right-2 bg-black/80 hover:bg-rose-900/80 text-rose-300 p-1.5 rounded-full backdrop-blur-sm transition-colors"
+                title="Eliminar foto de portada"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ) : (
+            <div className="p-4 border border-dashed border-[var(--line-soft)] rounded-lg text-center text-xs text-[var(--ivory-dim)]/60 bg-[var(--ink-2)]/20">
+              Sin foto asignada (se mostrará únicamente el título)
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-2 pt-1">
+            <label className="btn-ghost flex-1 cursor-pointer flex items-center justify-center gap-2 py-2 text-xs rounded border border-[var(--line-soft)]">
+              <Upload size={14} />
+              <span>{isUploadingIntroPhoto ? 'Subiendo imagen...' : 'Subir foto para la cabecera'}</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleIntroPhotoUpload}
+                className="hidden"
+                disabled={isUploadingIntroPhoto}
+              />
+            </label>
+            <input
+              type="text"
+              value={introForm.image || ''}
+              onChange={(e) => {
+                setIntroForm({ ...introForm, image: e.target.value });
+                setIntroDirty(true);
+              }}
+              placeholder="O ingresa URL de la imagen..."
+              className="flex-1 bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={isSavingIntro}
             className="btn-gold text-xs py-2 px-4 rounded disabled:opacity-60"
           >
-            {isSavingIntro ? 'Guardando…' : 'Guardar texto'}
+            {isSavingIntro ? 'Guardando…' : 'Guardar portada e información'}
           </button>
         </div>
       </form>
@@ -219,20 +325,33 @@ export default function AdminGaleria({ onNotify }) {
             className="bg-[var(--ink-2)]/30 border border-[var(--line-soft)] rounded-lg overflow-hidden flex flex-col justify-between hover:border-[var(--line)] transition-all group"
           >
             <div>
-              <div className="relative aspect-[4/3] bg-black/10 overflow-hidden">
-                <img
-                  src={photo.src}
-                  alt={photo.cap}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-2 left-2 bg-[var(--ink)]/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-mono text-[var(--ivory)] rounded">
-                  Foto #{idx + 1}
+              {photo.src ? (
+                <div className="relative aspect-[4/3] bg-black/10 overflow-hidden">
+                  <img
+                    src={photo.src}
+                    alt={photo.cap}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-2 left-2 bg-[var(--ink)]/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-mono text-[var(--ivory)] rounded">
+                    Foto #{idx + 1}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="relative aspect-[4/3] bg-[var(--ink-2)]/50 flex flex-col items-center justify-center text-[var(--ivory-dim)]/50 border-b border-[var(--line-soft)] p-4 text-center">
+                  <FileText className="w-8 h-8 mb-2 text-[var(--gold)]/60" />
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--gold)]/80">Solo Título / Texto</span>
+                  <div className="absolute top-2 left-2 bg-[var(--ink)]/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-mono text-[var(--ivory)] rounded">
+                    #{idx + 1}
+                  </div>
+                </div>
+              )}
 
-              <div className="p-3.5">
-                <p className="text-xs font-serif text-[var(--ivory)] line-clamp-2">
-                  {photo.cap || 'Sin epígrafe'}
+              <div className="p-3.5 space-y-1.5">
+                <p className="text-xs font-serif text-[var(--ivory)] font-medium line-clamp-1">
+                  {photo.cap || 'Sin título'}
+                </p>
+                <p className="text-[11px] text-[var(--ivory-dim)] line-clamp-2 leading-relaxed">
+                  {photo.text || 'Sin texto descriptivo'}
                 </p>
               </div>
             </div>
@@ -243,13 +362,13 @@ export default function AdminGaleria({ onNotify }) {
                 className="text-xs text-[var(--gold-hi)] hover:text-black font-medium flex items-center gap-1 p-1"
               >
                 <Pencil size={13} />
-                Editar / Reemplazar
+                Editar / Modificar
               </button>
 
               <button
                 onClick={() => handleDeletePhoto(idx)}
                 className="p-1 text-rose-400/80 hover:text-rose-300 transition-colors"
-                title="Eliminar foto"
+                title="Eliminar publicación"
               >
                 <Trash2 size={14} />
               </button>
@@ -261,10 +380,10 @@ export default function AdminGaleria({ onNotify }) {
       {/* Modal Edición / Alta de Foto */}
       {editingPhoto !== null && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[var(--ink)] border border-[var(--line)] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-[var(--ink)] border border-[var(--line)] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-[var(--line-soft)]">
               <h3 className="font-serif text-lg text-[var(--ivory)] font-medium">
-                {editingPhoto === 'new' ? 'Agregar Fotografía a la Galería' : 'Actualizar Fotografía'}
+                {editingPhoto === 'new' ? 'Agregar Elemento a la Galería' : 'Actualizar Elemento'}
               </h3>
               <button
                 onClick={() => setEditingPhoto(null)}
@@ -276,18 +395,32 @@ export default function AdminGaleria({ onNotify }) {
 
             <form onSubmit={handleSavePhoto} className="space-y-4 text-sm">
               {/* Preview */}
-              <div className="aspect-[16/9] w-full bg-black/10 rounded overflow-hidden flex items-center justify-center border border-[var(--line)]">
+              <div className="aspect-[16/9] w-full bg-black/10 rounded overflow-hidden flex items-center justify-center border border-[var(--line)] relative group">
                 {photoPreview ? (
-                  <img src={photoPreview} alt="Vista previa" className="w-full h-full object-cover" />
+                  <>
+                    <img src={photoPreview} alt="Vista previa" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={handleRemovePhotoSrc}
+                      className="absolute top-2 right-2 bg-black/80 hover:bg-rose-900/80 text-rose-300 px-2 py-1 rounded text-xs flex items-center gap-1 backdrop-blur-sm transition-colors"
+                      title="Quitar imagen"
+                    >
+                      <Trash2 size={12} />
+                      Quitar imagen
+                    </button>
+                  </>
                 ) : (
-                  <ImageIcon className="w-10 h-10 text-[var(--ivory-dim)]/50" />
+                  <div className="flex flex-col items-center gap-1 text-center p-3 text-[var(--ivory-dim)]/60">
+                    <ImageIcon className="w-8 h-8 text-[var(--ivory-dim)]/40" />
+                    <span className="text-xs">Sin imagen (opcional: puedes dejar solo título y texto)</span>
+                  </div>
                 )}
               </div>
 
               {/* Botón archivo */}
               <label className="btn-ghost w-full cursor-pointer flex items-center justify-center gap-2 py-2 text-xs rounded">
                 <Upload size={14} />
-                <span>{isUploadingPhoto ? 'Procesando imagen...' : 'Seleccionar foto de tu dispositivo'}</span>
+                <span>{isUploadingPhoto ? 'Procesando imagen...' : (photoPreview ? 'Cambiar imagen' : 'Seleccionar foto de tu dispositivo (opcional)')}</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -298,9 +431,20 @@ export default function AdminGaleria({ onNotify }) {
               </label>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
-                  O ingresar ruta/URL de imagen
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)]">
+                    O ingresar ruta/URL de imagen (opcional)
+                  </label>
+                  {photoPreview && (
+                    <button
+                      type="button"
+                      onClick={handleRemovePhotoSrc}
+                      className="text-[11px] text-rose-400 hover:text-rose-300"
+                    >
+                      Eliminar imagen
+                    </button>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={photoForm.src}
@@ -308,22 +452,34 @@ export default function AdminGaleria({ onNotify }) {
                     setPhotoForm({ ...photoForm, src: e.target.value });
                     setPhotoPreview(e.target.value);
                   }}
-                  placeholder="Ej: /img/publico-evento.jpg"
+                  placeholder="Ej: /img/publico-evento.jpg (deja vacío para solo título y texto)"
                   className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
-                  Epígrafe / Texto al pie
+                  Título (aparece arriba)
                 </label>
                 <input
                   type="text"
-                  required
                   value={photoForm.cap}
                   onChange={(e) => setPhotoForm({ ...photoForm, cap: e.target.value })}
                   placeholder="Ej: Concurrencia en la subasta · Alberdi 355"
                   className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ivory-dim)] mb-1">
+                  Texto descriptivo / Información
+                </label>
+                <textarea
+                  rows={4}
+                  value={photoForm.text || ''}
+                  onChange={(e) => setPhotoForm({ ...photoForm, text: e.target.value })}
+                  placeholder="Escribe la historia, contexto o detalles que se mostrarán..."
+                  className="w-full bg-[var(--ink-2)]/60 border border-[var(--line-soft)] rounded p-2 text-xs text-[var(--ivory)] focus:border-[var(--gold)] outline-none resize-y"
                 />
               </div>
 

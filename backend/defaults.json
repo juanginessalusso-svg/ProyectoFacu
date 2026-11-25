@@ -284,6 +284,7 @@
       "id": "gal-1",
       "src": "/img/visitantes-muestra.jpg",
       "cap": "Concurrencia en la subasta · Alberdi 355",
+      "text": "Una noche emblemática en la sede de Alberdi 355. Coleccionistas, inversores y apasionados del arte reunidos para disfrutar del diálogo directo con las piezas seleccionadas y participar de una velada de pujas en vivo.",
       "cls": "lg:col-span-8",
       "h": "h-[360px] md:h-[440px]"
     },
@@ -291,6 +292,7 @@
       "id": "gal-2",
       "src": "/img/disertante-podio.jpg",
       "cap": "Presentación en podio",
+      "text": "Apertura formal de sala y contextualización curatorial de las obras bajo martillo. Nuestro equipo resalta los aspectos técnicos, la trayectoria histórica del artista y el valor patrimonial de cada creación.",
       "cls": "lg:col-span-4",
       "h": "h-[360px] md:h-[440px]"
     },
@@ -298,6 +300,7 @@
       "id": "gal-3",
       "src": "/img/muro-exhibicion-general.jpg",
       "cap": "Exhibición de obras bajo iluminación de sala",
+      "text": "Disposición escenográfica pensada para realzar los matices, texturas y paletas cromáticas de cada firma. La iluminación puntual de galería permite contemplar las piezas en su máxima pureza y dimensión visual.",
       "cls": "lg:col-span-12",
       "h": "h-[280px] md:h-[420px]"
     },
@@ -305,6 +308,7 @@
       "id": "gal-4",
       "src": "/img/apreciacion-obras.jpg",
       "cap": "Apreciación de piezas en sala",
+      "text": "Espacios de contemplación íntima donde los visitantes pueden observar en detalle las técnicas y resoluciones de los grandes maestros y creadores contemporáneos de la región y el país.",
       "cls": "lg:col-span-4",
       "h": "h-[300px] md:h-[380px]"
     },
@@ -312,6 +316,7 @@
       "id": "gal-5",
       "src": "/img/obra-marco-dorado.jpg",
       "cap": "Obra enmarcada de la colección",
+      "text": "Cuidado y preservación en cada detalle. La selección de molduras de época y técnicas de conservación museológica garantizan que cada obra mantenga su jerarquía y esplendor a lo largo del tiempo.",
       "cls": "lg:col-span-4",
       "h": "h-[300px] md:h-[380px]"
     },
@@ -319,6 +324,7 @@
       "id": "gal-6",
       "src": "/img/galeria-muro-obras.jpg",
       "cap": "Montaje de piezas en sala y caballete",
+      "text": "Un recorrido curatorial dinámico que articula grandes formatos en muro con piezas de estudio sobre caballete, propiciando diferentes distancias de observación y una experiencia estética inmersiva.",
       "cls": "lg:col-span-4",
       "h": "h-[300px] md:h-[380px]"
     },
@@ -326,6 +332,7 @@
       "id": "gal-7",
       "src": "/img/obra-caballete.jpg",
       "cap": "Obra sobre caballete en sala",
+      "text": "Presentación protagónica para piezas destacadas de la subasta, permitiendo un acercamiento cercano y detallado a la materia, la pincelada y la impronta del artista.",
       "cls": "lg:col-span-6",
       "h": "h-[320px] md:h-[400px]"
     },
@@ -333,6 +340,7 @@
       "id": "gal-8",
       "src": "/img/obras-muro.jpg",
       "cap": "Muro de obras de la colección",
+      "text": "Perspectiva panorámica de una de las salas de exhibición permanente, integrando diversas corrientes artísticas en un diálogo armónico que enriquece el acervo cultural de nuestra ciudad.",
       "cls": "lg:col-span-6",
       "h": "h-[320px] md:h-[400px]"
     }

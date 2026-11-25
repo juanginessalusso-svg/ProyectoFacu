@@ -197,90 +197,18 @@ export default function Eventos() {
       <section className="section spot-top" style={{ paddingTop: '110px', paddingBottom: '90px' }}>
         <div className="wrap">
           {/* ========================================================= */}
-          {/* SECCIÓN 1: MEMORIA DE EVENTOS REALIZADOS (CON FOTOGRAFÍAS) */}
+          {/* SECCIÓN 1: PRÓXIMOS EVENTOS (AGENDA & APERTURAS)          */}
           {/* ========================================================= */}
-          <div className="mb-12">
-            <div className="flex items-center gap-4 text-[13px] tracking-[0.34em] uppercase text-[#e0dccf] font-medium before:content-[''] before:w-10 before:h-[1px] before:bg-[#e0dccf]">
-              Memoria &amp; Encuentros
-            </div>
-            <h1 className="mt-6 font-display font-medium text-[clamp(60px,9vw,120px)] leading-[0.95] tracking-tight text-[#f4f1ea]">
-              Even<em className="font-normal italic">tos</em>
-            </h1>
-          </div>
-
-          {/* Listado Editorial de Eventos Realizados */}
-          <div className="grid gap-12 mt-12">
-            {filteredPastEvents.map((ev, eventIdx) => {
-              return (
-                <AnimatedCard
-                  key={ev.id || eventIdx}
-                  delay={(eventIdx % 3) * 140}
-                  className="bg-[#46453d] border border-white/15 overflow-hidden transition-all duration-300 hover:border-white/30 shadow-xl"
-                >
-                  {/* Meta Superior */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 md:px-12 md:py-6 border-b border-white/15">
-                    <span className="inline-block bg-[#6b6a5f] text-white border border-white/20 text-[13px] font-semibold tracking-[0.14em] uppercase px-4 py-2.5">
-                      {ev.status || 'Realizado'}
-                    </span>
-
-                    <div className="flex flex-wrap items-center gap-3 md:gap-7 text-base">
-                      <div className="flex items-center gap-2.5 text-lg font-semibold text-[#f4f1ea]">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
-                          <rect x="3" y="5" width="18" height="16" rx="1"></rect>
-                          <path d="M3 10h18M8 3v4M16 3v4"></path>
-                        </svg>
-                        <span>{ev.date}</span>
-                      </div>
-
-                      {ev.location && (
-                        <div className="flex items-center gap-2.5 text-base text-[#ece8dc]">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
-                            <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"></path>
-                            <circle cx="12" cy="9.5" r="2.5"></circle>
-                          </svg>
-                          <span>{ev.location}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Texto: Título a la izquierda, Descripción a la derecha */}
-                  <div className="flex flex-wrap gap-6 md:gap-16 px-6 py-8 md:px-12 md:py-12">
-                    <h2 className="flex-1 min-w-[280px] md:min-w-[380px] m-0 font-display font-medium text-[clamp(32px,4.5vw,58px)] leading-[1.04] tracking-tight text-[#f4f1ea]">
-                      {ev.title}
-                    </h2>
-                    {ev.description && (
-                      <p className="flex-1 min-w-[280px] md:min-w-[420px] m-0 pt-2 text-base md:text-[18px] leading-[1.75] text-[#ece8dc] whitespace-pre-line font-normal">
-                        {ev.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Galería Fotográfica: Carrusel Automático + Miniaturas sincronizadas */}
-                  <div className="px-6 pb-6 md:px-12 md:pb-12">
-                    <EventPhotoCarousel
-                      event={ev}
-                      onOpenLightbox={handleOpenLightbox}
-                    />
-                  </div>
-                </AnimatedCard>
-              );
-            })}
-          </div>
-
-          {/* ========================================================= */}
-          {/* SECCIÓN 2: PRÓXIMOS EVENTOS (CALENDARIO & HORARIO)       */}
-          {/* ========================================================= */}
-          <div className="mt-28 pt-20 border-t-2 border-[var(--line)]">
-            {/* Header / Intro */}
+          <div>
+            {/* Header / Intro Próximos Eventos */}
             <div className="flex flex-wrap items-end justify-between gap-8 md:gap-16">
               <div className="flex-1 min-w-[280px]">
                 <div className="flex items-center gap-4 text-[13px] tracking-[0.34em] uppercase text-[#e0dccf] font-medium before:content-[''] before:w-10 before:h-[1px] before:bg-[#e0dccf]">
                   Agenda &amp; Aperturas
                 </div>
-                <h2 className="mt-6 font-display font-medium text-[clamp(48px,7vw,96px)] leading-[0.95] tracking-tight text-[#f4f1ea]">
+                <h1 className="mt-6 font-display font-medium text-[clamp(48px,7vw,96px)] leading-[0.95] tracking-tight text-[#f4f1ea]">
                   Próximos <em className="font-normal italic">Eventos</em>
-                </h2>
+                </h1>
               </div>
               <p className="flex-initial max-w-[400px] text-[16px] md:text-[17px] leading-[1.7] text-[#e4e0d4] m-0">
                 Fechas confirmadas, veladas culturales y subastas presenciales en sala. Reserva tu asistencia para participar de las próximas jornadas.
@@ -378,6 +306,85 @@ export default function Eventos() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* ========================================================= */}
+          {/* SECCIÓN 2: MEMORIA DE EVENTOS REALIZADOS (CON FOTOGRAFÍAS) */}
+          {/* ========================================================= */}
+          <div className="mt-28 pt-20 border-t-2 border-[var(--line)]">
+            <div className="flex flex-wrap items-end justify-between gap-8 md:gap-16 mb-12">
+              <div className="flex-1 min-w-[280px]">
+                <div className="flex items-center gap-4 text-[13px] tracking-[0.34em] uppercase text-[#e0dccf] font-medium before:content-[''] before:w-10 before:h-[1px] before:bg-[#e0dccf]">
+                  Memoria &amp; Encuentros
+                </div>
+                <h2 className="mt-6 font-display font-medium text-[clamp(48px,7vw,96px)] leading-[0.95] tracking-tight text-[#f4f1ea]">
+                  Eventos <em className="font-normal italic">Realizados</em>
+                </h2>
+              </div>
+              <p className="flex-initial max-w-[400px] text-[16px] md:text-[17px] leading-[1.7] text-[#e4e0d4] m-0">
+                Registro fotográfico y memoria curatorial de las subastas, aperturas y exhibiciones acontecidas en Galería Alberdi 355.
+              </p>
+            </div>
+
+            {/* Listado Editorial de Eventos Realizados */}
+            <div className="grid gap-12 mt-12">
+              {filteredPastEvents.map((ev, eventIdx) => {
+                return (
+                  <AnimatedCard
+                    key={ev.id || eventIdx}
+                    delay={(eventIdx % 3) * 140}
+                    className="bg-[#46453d] border border-white/15 overflow-hidden transition-all duration-300 hover:border-white/30 shadow-xl"
+                  >
+                    {/* Meta Superior */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 md:px-12 md:py-6 border-b border-white/15">
+                      <span className="inline-block bg-[#6b6a5f] text-white border border-white/20 text-[13px] font-semibold tracking-[0.14em] uppercase px-4 py-2.5">
+                        {ev.status || 'Realizado'}
+                      </span>
+
+                      <div className="flex flex-wrap items-center gap-3 md:gap-7 text-base">
+                        <div className="flex items-center gap-2.5 text-lg font-semibold text-[#f4f1ea]">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+                            <rect x="3" y="5" width="18" height="16" rx="1"></rect>
+                            <path d="M3 10h18M8 3v4M16 3v4"></path>
+                          </svg>
+                          <span>{ev.date}</span>
+                        </div>
+
+                        {ev.location && (
+                          <div className="flex items-center gap-2.5 text-base text-[#ece8dc]">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0dccf" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="shrink-0">
+                              <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"></path>
+                              <circle cx="12" cy="9.5" r="2.5"></circle>
+                            </svg>
+                            <span>{ev.location}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Texto: Título a la izquierda, Descripción a la derecha */}
+                    <div className="flex flex-wrap gap-6 md:gap-16 px-6 py-8 md:px-12 md:py-12">
+                      <h3 className="flex-1 min-w-[280px] md:min-w-[380px] m-0 font-display font-medium text-[clamp(32px,4.5vw,58px)] leading-[1.04] tracking-tight text-[#f4f1ea]">
+                        {ev.title}
+                      </h3>
+                      {ev.description && (
+                        <p className="flex-1 min-w-[280px] md:min-w-[420px] m-0 pt-2 text-base md:text-[18px] leading-[1.75] text-[#ece8dc] whitespace-pre-line font-normal">
+                          {ev.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Galería Fotográfica: Carrusel Automático + Miniaturas sincronizadas */}
+                    <div className="px-6 pb-6 md:px-12 md:pb-12">
+                      <EventPhotoCarousel
+                        event={ev}
+                        onOpenLightbox={handleOpenLightbox}
+                      />
+                    </div>
+                  </AnimatedCard>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

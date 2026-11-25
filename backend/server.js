@@ -448,12 +448,13 @@ app.put('/api/deadline', requireAuth, (req, res) => {
   }
 });
 
-// Guardar texto introductorio de la Galería (Protegido)
+// Guardar texto introductorio y foto de portada de la Galería (Protegido)
 app.put('/api/gallery-intro', requireAuth, (req, res) => {
-  const { title, text } = req.body || {};
+  const { title, text, image } = req.body || {};
   const intro = {
     title: String(title || '').slice(0, 200),
     text: String(text || '').slice(0, 5000),
+    image: String(image || '').slice(0, 5000000),
   };
   try {
     db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run('galleryIntro', JSON.stringify(intro));

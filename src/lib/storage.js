@@ -19,6 +19,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-1',
     src: IMAGES.galeriaPublico,
     cap: 'Concurrencia en la subasta · Alberdi 355',
+    text: 'Una noche emblemática en la sede de Alberdi 355. Coleccionistas, inversores y apasionados del arte reunidos para disfrutar del diálogo directo con las piezas seleccionadas y participar de una velada de pujas en vivo.',
     cls: 'lg:col-span-8',
     h: 'h-[360px] md:h-[440px]',
   },
@@ -26,6 +27,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-2',
     src: IMAGES.galeriaDisertante,
     cap: 'Presentación en podio',
+    text: 'Apertura formal de sala y contextualización curatorial de las obras bajo martillo. Nuestro equipo resalta los aspectos técnicos, la trayectoria histórica del artista y el valor patrimonial de cada creación.',
     cls: 'lg:col-span-4',
     h: 'h-[360px] md:h-[440px]',
   },
@@ -33,6 +35,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-3',
     src: IMAGES.galeriaMuroCalido,
     cap: 'Exhibición de obras bajo iluminación de sala',
+    text: 'Disposición escenográfica pensada para realzar los matices, texturas y paletas cromáticas de cada firma. La iluminación puntual de galería permite contemplar las piezas en su máxima pureza y dimensión visual.',
     cls: 'lg:col-span-12',
     h: 'h-[280px] md:h-[420px]',
   },
@@ -40,6 +43,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-4',
     src: IMAGES.galeriaApreciacion,
     cap: 'Apreciación de piezas en sala',
+    text: 'Espacios de contemplación íntima donde los visitantes pueden observar en detalle las técnicas y resoluciones de los grandes maestros y creadores contemporáneos de la región y el país.',
     cls: 'lg:col-span-4',
     h: 'h-[300px] md:h-[380px]',
   },
@@ -47,6 +51,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-5',
     src: IMAGES.galeriaMarcoDorado,
     cap: 'Obra enmarcada de la colección',
+    text: 'Cuidado y preservación en cada detalle. La selección de molduras de época y técnicas de conservación museológica garantizan que cada obra mantenga su jerarquía y esplendor a lo largo del tiempo.',
     cls: 'lg:col-span-4',
     h: 'h-[300px] md:h-[380px]',
   },
@@ -54,6 +59,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-6',
     src: IMAGES.galeriaMontaje,
     cap: 'Montaje de piezas en sala y caballete',
+    text: 'Un recorrido curatorial dinámico que articula grandes formatos en muro con piezas de estudio sobre caballete, propiciando diferentes distancias de observación y una experiencia estética inmersiva.',
     cls: 'lg:col-span-4',
     h: 'h-[300px] md:h-[380px]',
   },
@@ -61,6 +67,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-7',
     src: IMAGES.galeriaCaballete,
     cap: 'Obra sobre caballete en sala',
+    text: 'Presentación protagónica para piezas destacadas de la subasta, permitiendo un acercamiento cercano y detallado a la materia, la pincelada y la impronta del artista.',
     cls: 'lg:col-span-6',
     h: 'h-[320px] md:h-[400px]',
   },
@@ -68,6 +75,7 @@ export const DEFAULT_GALLERY = [
     id: 'gal-8',
     src: IMAGES.galeriaObrasMuro,
     cap: 'Muro de obras de la colección',
+    text: 'Perspectiva panorámica de una de las salas de exhibición permanente, integrando diversas corrientes artísticas en un diálogo armónico que enriquece el acervo cultural de nuestra ciudad.',
     cls: 'lg:col-span-6',
     h: 'h-[320px] md:h-[400px]',
   },
@@ -292,7 +300,7 @@ export function saveDeadline(dateString) {
   }
 }
 
-// --- TEXTO INTRODUCTORIO DE LA GALERÍA ---
+// --- TEXTO INTRODUCTORIO Y PORTADA DE LA GALERÍA ---
 export function getGalleryIntro() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.GALLERY_INTRO);
@@ -300,14 +308,19 @@ export function getGalleryIntro() {
     return {
       title: (parsed && parsed.title) || '',
       text: (parsed && parsed.text) || '',
+      image: (parsed && parsed.image) || '',
     };
   } catch (err) {
-    return { title: '', text: '' };
+    return { title: '', text: '', image: '' };
   }
 }
 
 export async function saveGalleryIntro(intro) {
-  const clean = { title: intro.title || '', text: intro.text || '' };
+  const clean = {
+    title: intro.title || '',
+    text: intro.text || '',
+    image: intro.image || '',
+  };
   localStorage.setItem(STORAGE_KEYS.GALLERY_INTRO, JSON.stringify(clean));
   notifyChange();
   const res = await fetch(`${API_BASE}/gallery-intro`, {
@@ -509,7 +522,15 @@ export function getGalleryPhotos() {
       return DEFAULT_GALLERY;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_GALLERY;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed.map((item, idx) => {
+        if (!item.text && DEFAULT_GALLERY[idx] && (item.id === DEFAULT_GALLERY[idx].id || item.cap === DEFAULT_GALLERY[idx].cap)) {
+          return { ...item, text: DEFAULT_GALLERY[idx].text };
+        }
+        return item;
+      });
+    }
+    return DEFAULT_GALLERY;
   } catch (err) {
     return DEFAULT_GALLERY;
   }
