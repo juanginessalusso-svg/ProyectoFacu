@@ -220,9 +220,9 @@ export const LOTS = [
     technique: 'Óleo',
     dimensions: '50 × 60 cm',
     year: '2000',
-    basePrice: '$USD 400',
-    priceValue: 400,
-    image: '/img/subastas/lote-18.jpg?v=2',
+    basePrice: '$USD 300',
+    priceValue: 300,
+    image: '/img/subastas/lote-18.jpg?v=3',
   },
   {
     id: 19,
