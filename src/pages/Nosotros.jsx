@@ -71,7 +71,7 @@ export default function Nosotros() {
           {/* BLOQUE 1: MISIÓN (Entra por la izquierda) + FOTOGRAFÍA 1 (Entra por la derecha) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 my-8 items-stretch">
             {/* MISIÓN */}
-            <AnimatedBlock direction="left" delay="0s" className="lg:col-span-7 flex flex-col">
+            <AnimatedBlock direction="left" delay="0s" className="lg:col-span-7 flex flex-col order-2 lg:order-1">
               <article className="h-full p-8 md:p-10 border border-[var(--line-soft)] bg-gradient-to-b from-[var(--ink-3)] to-[var(--ink-2)] transition-all duration-300 hover:border-[var(--line)] flex flex-col justify-between">
                 <div>
                   <h2 className="font-serif text-3xl md:text-4xl text-[var(--ivory)] font-light mb-5 tracking-wide">
@@ -92,12 +92,12 @@ export default function Nosotros() {
               </article>
             </AnimatedBlock>
 
-            {/* FOTOGRAFÍA 1 */}
-            <AnimatedBlock direction="right" delay="0.1s" className="lg:col-span-5 flex flex-col">
+            {/* FOTOGRAFÍA 1 (Misión) */}
+            <AnimatedBlock direction="right" delay="0.1s" className="lg:col-span-5 flex flex-col order-1 lg:order-2">
               <div className="shot h-full min-h-[300px] lg:min-h-[380px]">
                 <img
-                  src={IMAGES.nosotrosMusica}
-                  alt="Apreciación de obras y música en vivo en la sala de Insignia"
+                  src={IMAGES.nosotrosMision}
+                  alt="Subastas Insignia - Catálogo y presentación institucional"
                   loading="lazy"
                 />
                 <span className="stage-vig" aria-hidden="true" />
@@ -107,12 +107,12 @@ export default function Nosotros() {
 
           {/* BLOQUE 2: FOTOGRAFÍA 2 (Entra por la izquierda) + VISIÓN (Entra por la derecha) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 my-8 items-stretch">
-            {/* FOTOGRAFÍA 2 */}
-            <AnimatedBlock direction="left" delay="0s" className="lg:col-span-5 flex flex-col order-2 lg:order-1">
+            {/* FOTOGRAFÍA 2 (Visión) */}
+            <AnimatedBlock direction="left" delay="0s" className="lg:col-span-5 flex flex-col order-1 lg:order-1">
               <div className="shot h-full min-h-[300px] lg:min-h-[380px]">
                 <img
-                  src={IMAGES.nosotrosTango}
-                  alt="Encuentro de artes y cultura en la sala de Insignia"
+                  src={IMAGES.nosotrosVision}
+                  alt="Subastas Insignia - Dirección y análisis de obras"
                   loading="lazy"
                 />
                 <span className="stage-vig" aria-hidden="true" />
@@ -120,7 +120,7 @@ export default function Nosotros() {
             </AnimatedBlock>
 
             {/* VISIÓN */}
-            <AnimatedBlock direction="right" delay="0.1s" className="lg:col-span-7 flex flex-col order-1 lg:order-2">
+            <AnimatedBlock direction="right" delay="0.1s" className="lg:col-span-7 flex flex-col order-2 lg:order-2">
               <article className="h-full p-8 md:p-10 border border-[var(--line-soft)] bg-gradient-to-b from-[var(--ink-3)] to-[var(--ink-2)] transition-all duration-300 hover:border-[var(--line)] flex flex-col justify-between">
                 <div>
                   <h2 className="font-serif text-3xl md:text-4xl text-[var(--ivory)] font-light mb-5 tracking-wide">

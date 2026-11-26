@@ -282,7 +282,7 @@
   "gallery": [
     {
       "id": "gal-1",
-      "src": "/img/visitantes-muestra.jpg",
+      "src": "/img/galeria-concurrencia.jpg",
       "cap": "Concurrencia en la subasta · Alberdi 355",
       "text": "Una noche emblemática en la sede de Alberdi 355. Coleccionistas, inversores y apasionados del arte reunidos para disfrutar del diálogo directo con las piezas seleccionadas y participar de una velada de pujas en vivo.",
       "cls": "lg:col-span-8",
@@ -290,7 +290,7 @@
     },
     {
       "id": "gal-2",
-      "src": "/img/disertante-podio.jpg",
+      "src": "/img/galeria-sala-iluminada.jpg",
       "cap": "Presentación en podio",
       "text": "Apertura formal de sala y contextualización curatorial de las obras bajo martillo. Nuestro equipo resalta los aspectos técnicos, la trayectoria histórica del artista y el valor patrimonial de cada creación.",
       "cls": "lg:col-span-4",

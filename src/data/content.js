@@ -16,8 +16,8 @@ export const IMAGES = {
   homeMuro: '/img/muro-exhibicion-general.jpg',
 
   // Fotos para la Galería (8 exclusivas)
-  galeriaPublico: '/img/publico-evento.jpg',
-  galeriaDisertante: '/img/disertante-podio.jpg',
+  galeriaPublico: '/img/galeria-concurrencia.jpg',
+  galeriaDisertante: '/img/galeria-sala-iluminada.jpg',
   galeriaMuroCalido: '/img/galeria-muro-obras.jpg',
   galeriaApreciacion: '/img/apreciacion-obras.jpg',
   galeriaMarcoDorado: '/img/obra-marco-dorado.jpg',
@@ -26,6 +26,8 @@ export const IMAGES = {
   galeriaObrasMuro: '/img/obras-muro.jpg',
 
   // Fotos exclusivas para Nosotros (2 exclusivas)
+  nosotrosMision: '/img/nosotros-mision.jpg',
+  nosotrosVision: '/img/nosotros-vision.jpg',
   nosotrosMusica: '/img/nosotros-musica.jpg',
   nosotrosTango: '/img/nosotros-tango.jpg',
 };
@@ -256,8 +258,8 @@ export const SERVICES = [
     icon: Gavel,
     title: 'Subastas',
     text: 'Subastas presenciales en sala con convocatoria a coleccionistas e inversores del país.',
-    image: '/img/servicios/subastas.jpg',
-    alt: 'Sala llena durante una subasta presencial',
+    image: '/img/servicios/subasta-martillero.jpg',
+    alt: 'Martillero en podio durante subasta presencial',
   },
   {
     icon: Handshake,
