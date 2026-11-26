@@ -246,6 +246,12 @@ export default function Subastas() {
       return;
     }
 
+    // Misma validación que el servidor: si no coincide, el backend rechaza la acreditación
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setAccreditationError('El correo electrónico no es válido. Revisá que esté completo (ej: nombre@gmail.com).');
+      return;
+    }
+
     const userData = {
       name: cleanName,
       dni: cleanDni,

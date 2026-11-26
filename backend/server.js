@@ -448,12 +448,13 @@ app.put('/api/deadline', requireAuth, (req, res) => {
   }
 });
 
-// Guardar texto introductorio de la Galería (Protegido)
+// Guardar texto introductorio y foto de portada de la Galería (Protegido)
 app.put('/api/gallery-intro', requireAuth, (req, res) => {
-  const { title, text } = req.body || {};
+  const { title, text, image } = req.body || {};
   const intro = {
     title: String(title || '').slice(0, 200),
     text: String(text || '').slice(0, 5000),
+    image: String(image || '').slice(0, 5000000),
   };
   try {
     db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run('galleryIntro', JSON.stringify(intro));
@@ -527,7 +528,9 @@ app.post('/api/bids', (req, res) => {
     }
 
     const lot = JSON.parse(lotRow.data);
-    const currentPrice = lot.currentPrice || lot.priceValue || 0;
+    // El precio vigente sale de las pujas registradas (asi un reinicio de pujas vuelve al precio base)
+    const maxBidRow = db.prepare('SELECT MAX(amount) AS maxAmount FROM bids WHERE lot_id = ?').get(lotIdNum);
+    const currentPrice = (maxBidRow && maxBidRow.maxAmount) || lot.priceValue || 0;
     const BID_INCREMENT = 50; // Escalón de puja de a $USD 50
     const minRequired = currentPrice + BID_INCREMENT;
 
@@ -569,6 +572,28 @@ app.post('/api/bids', (req, res) => {
   } catch (err) {
     console.error('Error registrando oferta:', err);
     res.status(500).json({ error: 'Error interno al procesar la preoferta' });
+  }
+});
+
+// Reiniciar las preofertas de un lote: borra sus pujas y vuelve al precio base (Protegido)
+app.delete('/api/bids/lot/:lotId', requireAuth, (req, res) => {
+  const lotIdNum = parseInt(req.params.lotId, 10);
+  if (!Number.isInteger(lotIdNum)) {
+    return res.status(400).json({ error: 'Lote inválido' });
+  }
+  try {
+    const info = db.prepare('DELETE FROM bids WHERE lot_id = ?').run(lotIdNum);
+    const lotRow = db.prepare('SELECT data FROM lots WHERE id = ?').get(lotIdNum);
+    if (lotRow) {
+      const lot = JSON.parse(lotRow.data);
+      delete lot.currentPrice;
+      lot.bidsCount = 0;
+      db.prepare('UPDATE lots SET data = ? WHERE id = ?').run(JSON.stringify(lot), lotIdNum);
+    }
+    res.json({ success: true, deleted: info.changes });
+  } catch (err) {
+    console.error('Error al reiniciar preofertas:', err);
+    res.status(500).json({ error: 'Error al reiniciar las preofertas del lote' });
   }
 });
 
