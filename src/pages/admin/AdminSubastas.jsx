@@ -32,6 +32,7 @@ import {
   formatDeadlineText,
   apiUploadImage,
   apiGetBids,
+  apiResetLotBids,
   apiGetAccreditations,
   apiDeleteAccreditation,
   apiResetAllAccreditations,
@@ -155,11 +156,8 @@ export default function AdminSubastas({ onNotify }) {
 
   const loadData = async () => {
     setLots(getLots());
+    // Las pujas se arman solo desde el servidor (así un reinicio no "revive" copias locales viejas)
     let currentPreoffers = {};
-    try {
-      const savedPreoffers = localStorage.getItem('insignia_preoffers_v1');
-      if (savedPreoffers) currentPreoffers = JSON.parse(savedPreoffers);
-    } catch {}
 
     // Sincronizar pujas completas desde la base de datos backend
     try {
@@ -340,9 +338,14 @@ export default function AdminSubastas({ onNotify }) {
     onNotify('Lote eliminado del catálogo');
   };
 
-  const handleResetPreoffers = (lotId) => {
+  const handleResetPreoffers = async (lotId) => {
     if (!window.confirm('¿Reiniciar las preofertas de este lote a su precio base?')) return;
     try {
+      const ok = await apiResetLotBids(lotId);
+      if (!ok) {
+        onNotify('No se pudieron reiniciar las preofertas en el servidor. Volvé a iniciar sesión e intentá de nuevo.');
+        return;
+      }
       const current = { ...preoffers };
       delete current[lotId];
       localStorage.setItem('insignia_preoffers_v1', JSON.stringify(current));

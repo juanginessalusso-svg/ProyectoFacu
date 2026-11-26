@@ -55,7 +55,8 @@ server {
     }
 
     # Proxy hacia las fotos subidas dinámicamente desde el panel
-    location /uploads/ {
+    # ^~ hace que esta regla gane sobre la de cache de imagenes (.jpg/.png), si no las fotos dan 404
+    location ^~ /uploads/ {
         proxy_pass http://127.0.0.1:4800/uploads/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

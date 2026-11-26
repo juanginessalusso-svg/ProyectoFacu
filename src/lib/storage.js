@@ -228,16 +228,15 @@ export async function syncFromServer() {
       if (bidsRes.ok) {
         const bidsData = await bidsRes.json();
         if (bidsData.preoffers && typeof bidsData.preoffers === 'object') {
-          const currentLocal = JSON.parse(localStorage.getItem('insignia_preoffers_v1') || '{}');
+          // El servidor manda: si un lote se reinició, desaparece también de la copia local
+          const previousLocal = JSON.parse(localStorage.getItem('insignia_preoffers_v1') || '{}');
+          const currentLocal = {};
           for (const [lotId, info] of Object.entries(bidsData.preoffers)) {
-            const loc = currentLocal[lotId];
-            if (!loc || info.highestBid > (loc.highestBid || 0)) {
-              currentLocal[lotId] = {
-                ...(loc || {}),
-                highestBid: info.highestBid,
-                date: info.date,
-              };
-            }
+            currentLocal[lotId] = {
+              ...(previousLocal[lotId] || {}),
+              highestBid: info.highestBid,
+              date: info.date,
+            };
           }
           localStorage.setItem('insignia_preoffers_v1', JSON.stringify(currentLocal));
         }
@@ -612,6 +611,20 @@ export async function apiSubmitBid({ lotId, name, phone, email, dni, amount }) {
 }
 
 // Obtener todas las ofertas históricas para el Administrador
+// Reiniciar las preofertas de un lote en el servidor (Admin)
+export async function apiResetLotBids(lotId) {
+  try {
+    const res = await fetch(`${API_BASE}/bids/lot/${lotId}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeader() },
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('[Bids] Error al reiniciar preofertas del lote:', err);
+    return false;
+  }
+}
+
 export async function apiGetBids() {
   try {
     const res = await fetch(`${API_BASE}/bids`, {
